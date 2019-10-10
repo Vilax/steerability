@@ -21,8 +21,8 @@ n=100;
 filt = makeSteerFilt3D(n, r0, sigmaDenom, 'poly', p);
 
 M = (N+1)*(N+2)/2;
-[V,~,~,~] = ParticleSampleSphere('N', 2*M);
-DirCos = V(1:M, :);
+% [V,~,~,~] = ParticleSampleSphere('N', 2*M);
+% DirCos = V(1:M, :);
 DirCos =  [ -0.0981    0.0682    0.9928;
     0.4509   -0.2945    0.8426;
    -0.2773   -0.5078    0.8156;
@@ -74,22 +74,22 @@ for isym = 1:size(symAxes,1)
 end
 
 % now for odd filters
-close all;
-N = 3;
-poleCap = pi/3;
-
-nonzeroBool = [0 1 0 1];
-
-% HERE DEFINE AND NORMALIZE ODD POLYNOMIAL P
-
-phiVals = [0:0.1:pi/2];
-cosVals = cos(phiVals);
-figure; plot(phiVals, polyval(p,cosVals));
-
-f0 = 10;
-sigmaDenom = 5;
-r0 = 30;
-n = 100;
-filt = makeSteerFilt3D(n, r0, sigmaDenom, 'poly', p);
+% close all;
+% N = 3;
+% poleCap = pi/3;
+% 
+% nonzeroBool = [0 1 0 1];
+% 
+% % HERE DEFINE AND NORMALIZE ODD POLYNOMIAL P
+% 
+% phiVals = [0:0.1:pi/2];
+% cosVals = cos(phiVals);
+% figure; plot(phiVals, polyval(p,cosVals));
+% 
+% f0 = 10;
+% sigmaDenom = 5;
+% r0 = 30;
+% n = 100;
+% filt = makeSteerFilt3D(n, r0, sigmaDenom, 'poly', p);
 
 
