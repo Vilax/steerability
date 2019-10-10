@@ -12,7 +12,7 @@ function rotatedFilt = rotateFilt3D(filt, targetDir, startDir)
     
     % first compute angle of rotation from 3d in degrees
     targetDir = targetDir / norm(targetDir);
-    angle = acos(sum(targetDir(:) .* startDir(:)));
+    angle = acos(sum(targetDir(:) .* startDir(:))) * 180/pi;
     
     w = cross(startDir, targetDir); % axis of rotation
 
