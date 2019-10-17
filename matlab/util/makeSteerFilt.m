@@ -7,6 +7,7 @@ function filt = makeSteerFilt(n, f, theta,r0,sigmaDenom)
 
     g=exp(-(r-r0).^2/(2*sigma^2));
     angle=atan2(x,y);
+    % angle to north pole must be in range 0 to pi
     angle = angle .* (angle >= 0) - (angle .* (angle < 0));
     angleSize=size(angle);
     a=reshape(angle,[prod(angleSize) 1]);

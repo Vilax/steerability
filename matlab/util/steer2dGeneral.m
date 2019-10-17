@@ -42,7 +42,7 @@ end
 function [bCos,sqrtSin,theta,dtheta]=getBasis(N,nSamples, nonzeroBool)
     dtheta=pi/(nSamples);
     theta=[0:dtheta:pi]';
-    bCos=zeros(numel(theta),N);
+    bCos=zeros(numel(theta),N+1);
     cosTheta=cos(theta);
     sqrtSin=sqrt(sin(theta));
     for j=1:N+1,

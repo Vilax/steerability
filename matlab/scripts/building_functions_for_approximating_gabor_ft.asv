@@ -1,6 +1,6 @@
 % script building and demonstrating functions that use steerable filters to
 % approximate the fourier transform of gabor functions
-close all; clear all;
+
 % first create a fourier transform of a gabor filter
 n = 100; % size of image
 [X, Y] = meshgrid(-n:n);
@@ -19,11 +19,11 @@ cosTheta = cos(Theta);
                 
 % create function to be optimized. IE the l2 distance
 
-fun = @(x) sum(sum((gaborEvenFT - (exp(-(R/(n/x(1))).^2)) .* ...
+fun = @(x) sum(sum((gaborEvenFT - (exp(-((R/(n/x(2))).^2) .* ...
     (polyval([x(3), x(2), 1], R)) .* ...
-    (polyval([x(6), 0, x(5), 0, x(4)], cosTheta))).^2, 2),1)
+    (polyval([x(6), 0, x(5), 0, x(4)], cosTheta))) ).^2, 2),1)
 
-xinit = [5, 2, 2, 0.7, 1, 1.3];
+xinit = [7, 5, 2, 2, 0.7, 1, 1.3];
 options = optimset('PlotFcns',@optimplotfval);
 [x, fval] = fminsearch(fun, xinit, options)
 current_x = x;
