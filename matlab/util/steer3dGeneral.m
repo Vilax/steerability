@@ -33,7 +33,7 @@ function [f,u,bCos,phi]=  steer3dGeneral(Theta, N, nonzeroBool)
 end
 
 function [bCos,sqrtSin,theta,dtheta]=getBasis(N, nSamples, nonzeroBool)
-    dtheta=pi/(nSamples);
+    dtheta=pi/(nSamples-1);
     theta=[0:dtheta:pi]';
     bCos=zeros(numel(theta),N);
     cosTheta=cos(theta);

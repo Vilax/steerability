@@ -1,6 +1,8 @@
-import pandas as pd
 import numpy as np
 import math
+import scipy.linalg as la
+import matplotlib.pyplot as plt
+#import scipy.sparse.linalg as sla
 
 def steerable_polynomial3d(poleCap, N, nonzeroBool=None):
     
@@ -16,7 +18,32 @@ def steerable_polynomial3d(poleCap, N, nonzeroBool=None):
 
     G1 = make_gram_matrix(bCos,sqrtSin,phi,dphi,poleCap)  
     G2 = make_gram_matrix(bCos,sqrtSin,phi,dphi,math.pi/2)
-    return
+    
+    D, V = la.eig(G1, G2)
+    eigval_max = np.argmax(D)
+    V = np.matrix(V)
+    v = V[:,eigval_max]
+    print(D)
+    print(v)
+    constraint = v.transpose() * G2 * v
+    obj = (v.transpose() * G1 * v) / constraint
+    print(constraint)
+    print(obj)
+    f = make_steerable_function(v, bCos)
+    f = f/f[0]
+    plt.figure()
+    plt.plot(phi, f)
+    
+    # now plot f
+    return f, v, bCos, phi
+
+def make_steerable_function(v, bCos):
+    nVals = bCos.shape[0]
+    npowers = bCos.shape[1]
+    f = np.matrix(np.zeros((nVals, 1)))
+    for j in range(npowers):
+        f += bCos[:,j] * v[j]
+    return f        
 
 def make_default_nonzeroBool(N):
     assert(N>0)
@@ -43,7 +70,7 @@ def get_basis(N, num_samples, nonzeroBool):
     bCos = bCos[:, nonzeroBool == [1]*len(nonzeroBool)]
     return bCos, sqrtSin, phi, dphi
 
-def make_gram_matrix(bCos, sqrtSin, phi, dphi, phiEnd = pi/2):
+def make_gram_matrix(bCos, sqrtSin, phi, dphi, phiEnd = math.pi/2):
     bCos = bCos[phi<phiEnd, :]
     sqrtSin = sqrtSin[phi<phiEnd]
     sinMat = np.tile(sqrtSin, [1, bCos.shape[1]])    
