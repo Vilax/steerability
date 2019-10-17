@@ -12,6 +12,7 @@ import numpy as np
 import math
 sys.path.insert(0, '../util')
 import steering3D as steer
+import filter3d as filt
 
 class TestPolynomialMethods(unittest.TestCase):
     def test_steerable_polynomial3d(self):
