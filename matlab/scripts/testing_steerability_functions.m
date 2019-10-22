@@ -14,6 +14,9 @@ Theta = capSize;
 % p = even2Poly(a);
 % p = p / polyval(p,1);
 [f,u, bCos, theta] =   steer2dGeneral(Theta,N);
+figure; plot(theta, f);
+[f,u,bCos, theta] = steer2dMonotone(Theta,N)
+figure; plot(theta, f)
 normvals = computeNormalizationConstant2D(N);
 u = u ./ normvals;
 p = flipud(u);
@@ -28,6 +31,7 @@ bigImgLims = [xmin, xmax, ymin, ymax];
 % filt = poly2filter(p, bigImgLims, 0.04,0,5);
 r0 = 20;
 filt = makeSteerFilt(100, f, theta, r0, 5);
+figure; imagesc(filt)
 % filt(101:end,:) = -filt(101:end,:);
 
 nonzeroCoefficients = [-N:2:N];

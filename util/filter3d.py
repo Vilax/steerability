@@ -8,7 +8,7 @@ import numpy as np
 
 def make_filter(n, r0, sigma_denom, f, phi):
     
-    filter_range = np.array(np.arange(-n,n))
+    filter_range = np.array(np.arange(-n,n+1))
     X, Y, Z = np.meshgrid(filter_range, filter_range, filter_range)
     R = np.sqrt(np.power(X,2)+np.power(Y,2)+np.power(Z,2))
     sigma = n / sigma_denom
@@ -20,7 +20,7 @@ def make_filter(n, r0, sigma_denom, f, phi):
     angles = np.arccos(w)
     a = np.reshape(angles, (np.size(angles), 1))
     values = np.interp(phi, f, a)
-    spherical_vals = np.reshape(vals, angles.shape)
+    spherical_vals = np.reshape(values, angles.shape)
     
     filt = np.multiply(g, spherical_vals)
     return filt

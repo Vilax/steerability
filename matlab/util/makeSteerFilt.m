@@ -14,6 +14,7 @@ function filt = makeSteerFilt(n, f, theta,r0,sigmaDenom)
     values=interp1(theta,f,a);
     
     filt=g.*reshape(values,angleSize);
+    filt = reshape(values, angleSize);
 end
 
 % function filt = makeSteerFilt(n, f, theta,r0)

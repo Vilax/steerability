@@ -1,79 +1,56 @@
 import numpy as np
-import math
-import scipy.linalg as la
-import matplotlib.pyplot as plt
-#import scipy.sparse.linalg as sla
 
-def steerable_polynomial3d(poleCap, N, nonzeroBool=None):
+def compute_steer_basis_angles3d(N, direction_cosines):
+    M = (N+1)*(N+2)/2
+    direction_cosines = np.matrix(direction_cosines)
+
+    powers = direction_cosine_powers3d(N)
+    alpha_powers = powers[:,0]
+    beta_powers = powers[:,1]
+    gamma_powers = powers[:,2]
+
+    steer_alpha_base = np.tile(direction_cosines[:,0].transpose(), (M,1))
+    steer_beta_base = np.tile(direction_cosines[:,1].transpose(), (M,1))
+    steer_gamma_base = np.tile(direction_cosines[:,2].transpose(), (M,1))
+
+    steer_alpha = np.powers(steer_alpha_base, alpha_powers)
+    steer_beta = np.powers(steer_beta_base, beta_powers)
+    steer_gamma = np.powers(steer_gamma_base, gamma_powers)
+
+    steer_angles = np.multiply(np.multiply(steer_alpha, steer_beta), \
+                                                        steer_gamma)
+
+    return steer_angles
+
+def direction_cosine_powers3d(N):
+    M = (N+1)*(N+2)/2
+    powers = np.zeros((M, 3))
+    counter = 0
+    for ialpha in range(N+1):
+      remainder = N - ialpha
+      for ibeta in range(remainder+1):
+        igamma = N - ialpha - ibeta
+        powers[counter, 0] = ialpha
+        powers[counter, 1] = ibeta
+        powers[counter, 2] = igamma
+        counter += 1
+    return powers
+
+
+def make_steer_basis3d(filt, steer_direction_array):
+    nfilt = steer_direction_array.shape[0]
+    nrows, ncols, nframes = filt.shape
+
+    steer_filt_hypervolume = np.zeros((nrows,ncols,nfilt))
+
+    for ifilt in arange(nfilt):
+        steer_direction = steer_direction_array[ifilt,:]
+        steer_filt = rotate_filter3d(filt, steer_direction)
+        steer_filter_hypervolume[:,:,:,ifilt] = steer_filt
+
+def rotate_filter3d(filt, target_direction, start_direction = (0, 0, 1)):
+    northpole = [0, 0, 1]
     
-    DEFAULT_SAMPLES = 400
-    num_samples = DEFAULT_SAMPLES
+    assert(norm(startDir) > 0)
+    startDir = startDir / norm(startDir)
     
-    if nonzeroBool is None:
-        nonzeroBool = make_default_nonzeroBool(N)
-    assert(len(nonzeroBool) == N+1)    
-    nonzeroBool = np.array(nonzeroBool)        
-    
-    bCos, sqrtSin, phi, dphi = get_basis(N, num_samples, nonzeroBool)    
-
-    G1 = make_gram_matrix(bCos,sqrtSin,phi,dphi,poleCap)  
-    G2 = make_gram_matrix(bCos,sqrtSin,phi,dphi,math.pi/2)
-    
-    D, V = la.eig(G1, G2)
-    eigval_max = np.argmax(D)
-    V = np.matrix(V)
-    v = V[:,eigval_max]
-    print(D)
-    print(v)
-    constraint = v.transpose() * G2 * v
-    obj = (v.transpose() * G1 * v) / constraint
-    print(constraint)
-    print(obj)
-    f = make_steerable_function(v, bCos)
-    f = f/f[0]
-    plt.figure()
-    plt.plot(phi, f)
-    
-    # now plot f
-    return f, v, bCos, phi
-
-def make_steerable_function(v, bCos):
-    nVals = bCos.shape[0]
-    npowers = bCos.shape[1]
-    f = np.matrix(np.zeros((nVals, 1)))
-    for j in range(npowers):
-        f += bCos[:,j] * v[j]
-    return f        
-
-def make_default_nonzeroBool(N):
-    assert(N>0)
-    nonzeroBool = [0] *(N+1)
-    num_default_ones = math.ceil(len(nonzeroBool)/2)
-    nonzeroBool[-1::-2] = [1]*num_default_ones
-    return nonzeroBool
-
-def get_basis(N, num_samples, nonzeroBool):
-    assert(num_samples > 1)
-    dphi = math.pi/(num_samples-1)
-    phi = np.arange(0, math.pi+dphi,dphi)
-    bCos = np.matrix(np.zeros((len(phi),N+1)))
-    cosPhi = np.matrix(np.cos(phi)).transpose()
-    sqrtSin = np.matrix(np.sqrt(np.sin(phi))).transpose()
-    for j in range(N+1):
-        bCos[:,j] = np.power(cosPhi, j)
-    sinMat = np.tile(sqrtSin, [1, bCos.shape[1]])    
-    bCosSin = np.multiply(bCos, sinMat)
-    bCosNorm = np.matrix(np.sqrt(np.diagonal(bCosSin.transpose() * \
-                                             bCosSin * dphi)))
-    bCosNorm = np.tile(bCosNorm, [bCos.shape[0], 1])
-    bCos = np.divide(bCos, bCosNorm)
-    bCos = bCos[:, nonzeroBool == [1]*len(nonzeroBool)]
-    return bCos, sqrtSin, phi, dphi
-
-def make_gram_matrix(bCos, sqrtSin, phi, dphi, phiEnd = math.pi/2):
-    bCos = bCos[phi<phiEnd, :]
-    sqrtSin = sqrtSin[phi<phiEnd]
-    sinMat = np.tile(sqrtSin, [1, bCos.shape[1]])    
-    bCos = np.multiply(bCos, sinMat)
-    G = bCos.transpose() * bCos * dphi
-    return G

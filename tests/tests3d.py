@@ -13,6 +13,7 @@ import math
 sys.path.insert(0, '../util')
 import steering3D as steer
 import filter3d as filt
+import polynomial3d as poly3d
 
 class TestPolynomialMethods(unittest.TestCase):
     def test_steerable_polynomial3d(self):
@@ -20,25 +21,25 @@ class TestPolynomialMethods(unittest.TestCase):
     
     def test_make_default_nonzeroBool_raises_assertion(self): 
         # makes sure error is raised if 0 is passed
-        self.assertRaises(AssertionError, steer.make_default_nonzeroBool, 0)
+        self.assertRaises(AssertionError, poly3d.make_default_nonzeroBool, 0)
 
     def test_make_default_nonzeroBool_returns_correct_even_length(self):
         N = 4
         expected = [1, 0, 1, 0, 1]
-        results = steer.make_default_nonzeroBool(N)
+        results = poly3d.make_default_nonzeroBool(N)
         self.assertEqual(expected, results)
     
     def test_make_default_nonzeroBool_returns_correct_even_length(self):
         N = 5
         expected = [0, 1, 0, 1, 0, 1]
-        results = steer.make_default_nonzeroBool(N)
+        results = poly3d.make_default_nonzeroBool(N)
         self.assertEqual(expected, results)        
     def test_get_basis_returns_correct_phi(self):
         N = 4
-        nonzeroBool = steer.make_default_nonzeroBool(N)
+        nonzeroBool = poly3d.make_default_nonzeroBool(N)
         num_samples = 4
-        bCos, sqrtSin, phi, dphi = steer.get_basis(N, num_samples, nonzeroBool)
-        expected = np.matrix([0, math.pi/3, 2*math.pi/3, math.pi])      
+        bCos, sqrtSin, phi, dphi = poly3d.get_basis(N, num_samples, nonzeroBool)
+        expected = np.array([0, math.pi/3, 2*math.pi/3, math.pi])      
         np.testing.assert_array_equal(expected, phi)                           
     
 class TestMakeFilterMethods(unittest.TestCase):

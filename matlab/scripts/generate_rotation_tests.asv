@@ -1,0 +1,8 @@
+% this script makes matrices for testing rotation functions of python
+
+testVol = randn([50, 50, 50]);
+save('rotation_test_original', 'testVol', '-v7.3')
+
+axis1 = [1, 3, 4];
+axis 
+
