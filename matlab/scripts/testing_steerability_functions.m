@@ -15,8 +15,6 @@ Theta = capSize;
 % p = p / polyval(p,1);
 [f,u, bCos, theta] =   steer2dGeneral(Theta,N);
 figure; plot(theta, f);
-[f,u,bCos, theta] = steer2dMonotone(Theta,N)
-figure; plot(theta, f)
 normvals = computeNormalizationConstant2D(N);
 u = u ./ normvals;
 p = flipud(u);

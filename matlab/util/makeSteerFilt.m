@@ -6,6 +6,7 @@ function filt = makeSteerFilt(n, f, theta,r0,sigmaDenom)
     sigma=n/sigmaDenom;
 
     g=exp(-(r-r0).^2/(2*sigma^2));
+    %g = ones(size(g))
     angle=atan2(x,y);
     % angle to north pole must be in range 0 to pi
     angle = angle .* (angle >= 0) - (angle .* (angle < 0));
@@ -14,7 +15,6 @@ function filt = makeSteerFilt(n, f, theta,r0,sigmaDenom)
     values=interp1(theta,f,a);
     
     filt=g.*reshape(values,angleSize);
-    filt = reshape(values, angleSize);
 end
 
 % function filt = makeSteerFilt(n, f, theta,r0)

@@ -1,4 +1,11 @@
 import numpy as np
+import math
+import scipy as sp
+from scipy.spatial.transform import Rotation as R
+from numpy import linalg as la
+from scipy.spatial.transform import Rotation as R
+from scipy import ndimage as ndimg
+
 
 def compute_steer_basis_angles3d(N, direction_cosines):
     M = (N+1)*(N+2)/2
@@ -49,8 +56,48 @@ def make_steer_basis3d(filt, steer_direction_array):
         steer_filter_hypervolume[:,:,:,ifilt] = steer_filt
 
 def rotate_filter3d(filt, target_direction, start_direction = (0, 0, 1)):
-    northpole = [0, 0, 1]
     
-    assert(norm(startDir) > 0)
-    startDir = startDir / norm(startDir)
+    assert(la.norm(start_direction) > 0)
+    start_direction = start_direction / la.norm(start_direction)
+    assert(la.norm(target_direction) > 0)
+    target_direction = target_direction / la.norm(target_direction)
+    
+    rotation_matrix = get_rotation_matrix(start_direction,\
+                                                    target_direction)
+    
+    z1, x1, z2 = get_euler_angles(rotation_matrix)
+    # apply python rotations
+    rotated_filt = ndimg.rotate(filt, [0,1], z1, reshape = False)
+    rotated_filt = ndimg.rotate(rotated_filt, [1,2], x1, reshape = False)
+    rotated_filt = ndimg.rotate(rotated_filt ,[0,1], z2, reshape = False)
+    
+    return rotated_filt
+
+def get_rotation_matrix(start_direction, target_direction):
+    # first write in axis angle form
+    angle = np.arccos(np.dot(target_direction, start_direction)) * 180 / math.pi
+    w = np.cross(start_direction, target_direction)
+    axis = w / la.norm(w)
+    u1, u2, u3 = axis
+    
+    cosTheta = np.cos(angle)
+    sinTheta = np.sin(angle)
+    
+    rotation_matrix = np.matrix([[cosTheta + (u1**2)*(1-cosTheta), u1*u2*\
+                               (1-cosTheta)-u3*sinTheta, u1*u3*(1-cosTheta) + \
+                               u2*sinTheta],\
+                                 [u2*u1*(1-cosTheta)+u3*sinTheta, cosTheta + \
+                                  (u2**2)*(1-cosTheta), u2*u3*(1-cosTheta)-u1\
+                                  *sinTheta],\
+                                 [u3*u1*(1-cosTheta)-u2*sinTheta, u3*u2*\
+                                  (1-cosTheta) + u1*sinTheta, cosTheta + (u3**2) \
+                                  *(1-cosTheta)]])
+    
+    return rotation_matrix
+
+def get_euler_angles(rotation_matrix):  
+    r = R.from_dcm(np.array(rotation_matrix))
+    z1, y1, z2 = r.as_euler('zxz', degrees=True)
+    return z1, y1, z2
+    
     
