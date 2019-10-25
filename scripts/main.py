@@ -50,21 +50,21 @@ sym_test_axes = np.array([[1, 2, 3],[3,4,5]])
 nAxes = sym_test_axes.shape[0]
 
 for iaxis, axis_sym in enumerate(sym_test_axes):
-    axis_sym = axis_sym / norm(axis_sym)
+    axis_sym = axis_sym / npla.norm(axis_sym)
     alpha, beta, gamma = axis_sym
     
-    direction_angles = compute_direction_angle_powers(N, axis_sym)
+    direction_angles = steer.compute_direction_angle_powers(N, axis_sym)
     
     k = Phi * direction_angles
-    k = np.reshape(k, (1,1,1,num_basis_filters))
+    k = np.ndarray.flatten(np.array(k))
     
-    steered_filter = np.dot(k, steer_basis_hypervol)
-    brute_force_filter = rotate_filter3d(orig_filt, axis_sym)
+    steered_filter = np.dot(steer_basis_hypervol, k)
+    brute_force_filter = steer.rotate_filter3d(orig_filt, axis_sym)
     
     diff = steered_filter - brute_force_filter
     normalized_diff = npla.norm(diff) / npla.norm(steered_filter)
     print(normalized_diff)
-    assert(normalied_diff < 0.005)
+    assert(normalized_diff < 0.005)
     
     
     

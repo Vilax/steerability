@@ -20,7 +20,8 @@ def make_filter(n, r0, sigma_denom, f, phi):
     angles = np.arccos(w)
     a = np.reshape(angles, (np.size(angles), 1))
     phi = np.reshape(phi, np.size(f))
-    values = np.interp( np.ndarray.flatten(a), phi, np.ndarray.flatten(np.array(f)))
+    values = np.interp( np.ndarray.flatten(a), phi, \
+                       np.ndarray.flatten(np.array(f)))
     spherical_vals = np.reshape(values, angles.shape)
     
     filt = np.multiply(g, spherical_vals)

@@ -18,7 +18,7 @@ def compute_direction_angle_powers(N, directions):
     M = int((N+1)*(N+2)/2)
     directions = np.matrix(directions)
     
-    powers = direction_cosine_powers3d(N)
+    powers = np.matrix(direction_cosine_powers3d(N))
     alpha_powers = powers[:,0]
     beta_powers = powers[:,1]
     gamma_powers = powers[:,2]  

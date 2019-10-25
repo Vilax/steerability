@@ -27,7 +27,6 @@ def steerable_polynomial3d(poleCap, N, nonzeroBool=None):
     v = v / npla.norm(v)
     if v[0] < 0:
         v = v * (-1)
-        
     print('eigenvalues are: \n', D)
     print('eigenvector is \n', v)
     constraint = v.transpose() * G2 * v
@@ -55,6 +54,7 @@ def make_steerable_function(v, bCos):
     nVals = bCos.shape[0]
     npowers = bCos.shape[1]
     f = np.matrix(np.zeros((nVals, 1)))
+    
     for j in range(npowers):
         f += bCos[:,j] * v[j]
     return f        
@@ -68,18 +68,23 @@ def make_default_nonzeroBool(N):
 
 def get_basis(N, num_samples, nonzeroBool):
     assert(num_samples > 1)
+    
     dphi = math.pi/(num_samples-1)
     phi = np.arange(0, math.pi+dphi,dphi)
     bCos = np.matrix(np.zeros((len(phi),N+1)))
     cosPhi = np.matrix(np.cos(phi)).transpose()
     sqrtSin = np.matrix(np.sqrt(np.sin(phi))).transpose()
+    
     for j in range(N+1):
         bCos[:,j] = np.power(cosPhi, j)
+        
     sinMat = np.tile(sqrtSin, [1, bCos.shape[1]])    
     bCosSin = np.multiply(bCos, sinMat)
+    
     bCosNorm = np.matrix(np.sqrt(np.diagonal(bCosSin.transpose() * \
                                              bCosSin * dphi)))
     bCosNorm = np.tile(bCosNorm, [bCos.shape[0], 1])
+    
     bCos = np.divide(bCos, bCosNorm)
     bCos = bCos[:, nonzeroBool == [1]*len(nonzeroBool)]
 
