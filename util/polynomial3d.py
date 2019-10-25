@@ -2,6 +2,7 @@ import numpy as np
 import math
 import scipy.linalg as la
 import matplotlib.pyplot as plt
+from numpy import linalg as npla
 #import scipy.sparse.linalg as sla
 
 def steerable_polynomial3d(poleCap, N, nonzeroBool=None):
@@ -20,13 +21,18 @@ def steerable_polynomial3d(poleCap, N, nonzeroBool=None):
     G2 = make_gram_matrix(bCos,sqrtSin,phi,dphi,math.pi/2)
     
     D, V = la.eig(G1, G2)
-    eigval_max = np.argmax(D)
+    eigval_max = get_max_arg_real(D)
     V = np.matrix(V)
     v = V[:,eigval_max]
-    print(D)
-    print(v)
+    v = v / npla.norm(v)
+    if v[0] < 0:
+        v = v * (-1)
+        
+    print('eigenvalues are: \n', D)
+    print('eigenvector is \n', v)
     constraint = v.transpose() * G2 * v
     obj = (v.transpose() * G1 * v) / constraint
+    print('printing constraint and then objective')
     print(constraint)
     print(obj)
     f = make_steerable_function(v, bCos)
@@ -36,6 +42,14 @@ def steerable_polynomial3d(poleCap, N, nonzeroBool=None):
     
     # now plot f
     return f, v, bCos, phi
+
+def get_max_arg_real(a):
+    # for array a, gets argument of max value, with complex values treated as
+    # negative infinity
+    neg_inf = float('-inf')
+    a[np.iscomplex(a)] = neg_inf
+    return np.argmax(a)
+    
 
 def make_steerable_function(v, bCos):
     nVals = bCos.shape[0]

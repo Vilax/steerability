@@ -19,7 +19,12 @@ function [f,u,bCos,phi]=  steer3dGeneral(Theta, N, nonzeroBool)
     [v,d]=eigs(G1,G2);
     %Print gen eig values and 1st eigvect
     d
-    u=v(:,1)
+    u=v(:,1);
+    u = u / norm(u);
+    if u(1) < 0
+        u = -1 * u;
+    end
+    u
     %Print constraints and value of obj func
    constraint=u'*G2*u
    obj=(u'*G1*u)/(u'*G2*u)

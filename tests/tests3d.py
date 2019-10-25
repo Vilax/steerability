@@ -27,7 +27,7 @@ class TestPolynomialMethods(unittest.TestCase):
         f_matlab = mat['f']
         results = np.array(self.f)
         expected = f_matlab
-        np.testing.assert_array_almost_equal(expected, results, decimal = 4)
+        np.testing.assert_allclose(expected, results, rtol=0.05)
     
     def test_make_default_nonzeroBool_raises_assertion(self): 
         # makes sure error is raised if 0 is passed
@@ -55,7 +55,14 @@ class TestPolynomialMethods(unittest.TestCase):
         results = np.array(self.bCos)
         mat = spio.loadmat('bCos_N4.mat')
         expected = mat['bCos']
-        np.testing.assert_allclose(expected, results, rtol=0.05)      
+        np.testing.assert_allclose(expected, results, rtol=0.05)   
+    def test_correct_eigenvector_of_basis_returned(self):
+        expected = np.array([-0.0138, 0.2656, -0.9460])
+        results = np.reshape(np.array(v), (1,3))    
+        val = np.divide(expected, results)
+        print(val)
+        np.testing.assert_allclose(expected, results, rtol=0.05)    
+
     
 class TestMakeFilterMethods(unittest.TestCase):
     N = 4
