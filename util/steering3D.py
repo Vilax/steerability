@@ -3,7 +3,6 @@ import math
 import scipy as sp
 from scipy.spatial.transform import Rotation as R
 from numpy import linalg as la
-from scipy.spatial.transform import Rotation as R
 from scipy import ndimage as ndimg
 
 

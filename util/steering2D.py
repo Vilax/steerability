@@ -7,7 +7,7 @@ Created on Thu Sep 26 11:22:57 2019
 """
 import numpy as np
 import numpy.matlib as npm
-import utilFuntions as uf
+import util.utilFuntions as uf
 import random
 import scipy as sp
 from scipy import linalg, interpolate, misc

@@ -6,7 +6,7 @@ Created on Thu Sep 26 11:22:57 2019
 @author: jlvilas
 """
 import numpy as np
-import utilFuntions as uf
+import util.utilFuntions as uf
 
 
 def estimateGaborFRC(half1, half2, sigma, freq, threshold, HPF = True):

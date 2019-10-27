@@ -9,16 +9,16 @@ import numpy as np
 import math
 import scipy.linalg as la
 import matplotlib.pyplot as plt
-from scipy.spatial.transform import Rotation as R
+# from scipy.spatial.transform import Rotation as R
 from numpy import linalg as npla
-from scipy.spatial.transform import Rotation as R
-from scipy import ndimage as ndimg
+# from scipy.spatial.transform import Rotation as R
+# from scipy import ndimage as ndimg
 import sys
-sys.path.insert(0, '../util')
-import steering3D as steer
-import filter3d as filt
-import polynomial3d as poly3d
+import util.steering3D as steer
+import util.filter3d as filt
+import util.polynomial3d as poly3d
 import mrcfile
+sys.path.insert(0, '../util')
 
 # testing steering a filter derived from a gaussian of the radius times an even
 # polynomial
