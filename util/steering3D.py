@@ -4,6 +4,57 @@ import scipy as sp
 from scipy.spatial.transform import Rotation as R
 from numpy import linalg as la
 from scipy import ndimage as ndimg
+import util.polynomial3d as poly3d
+import util.filter3d as filt
+import util.utilFuntions as uf
+
+
+def directionalFilter3D(N, cap, r0, sigma, direction, filtSize):
+    # This function gives volume with the directional filter
+    # N represent the order of the polynomial of the filter
+    # The angle of the filter is defined as pi/cap
+    # sigma, si the standard deviation of the gaussian which defines the frequencies
+    # direction in radians
+
+    f, v, bCos, phi = poly3d.steerable_polynomial3d(cap, N)
+
+    filtSize = int(filtSize) / 2  # in pixels
+
+    orig_filt = filt.make_filter(filtSize, r0, sigma, f, phi)
+    print(orig_filt.shape)
+    img = orig_filt[:, 100, :]
+    uf.representImg(img, 'Filter', True)
+
+    direction_cosines = np.loadtxt('3d_direction_cosines_N4.txt')
+    steer_basis_hypervol = make_steer_basis3d(orig_filt, direction_cosines)
+    num_basis_filters = steer_basis_hypervol.shape[3]
+
+    steer_basis_angles = compute_steer_basis_angles3d(N, direction_cosines)
+    Phi = np.linalg.inv(steer_basis_angles)
+
+    sym_test_axes = np.array([[1, 2, 3], [3, 4, 5]])
+    nAxes = sym_test_axes.shape[0]
+    print(sym_test_axes)
+    iaxis = sym_test_axes[0, :]
+    axis_sym = sym_test_axes[1, :]
+    print(axis_sym)
+    axis_sym = axis_sym / np.linalg.norm(axis_sym)
+    print(axis_sym)
+    alpha, beta, gamma = axis_sym
+    print(alpha, "  ", beta, "  ", gamma)
+
+    axis_sym = [1, 0, 0]
+    direction_angles = compute_direction_angle_powers(N, axis_sym)
+
+    k = Phi * direction_angles
+    k = np.ndarray.flatten(np.array(k))
+
+    steeredFilt = np.dot(steer_basis_hypervol, k)
+    # print(steeredFilt.shape)
+    # img = steeredFilt[:, 100, :]
+    # uf.representImg(img, 'Filter', True)
+
+    return steeredFilt
 
 
 def compute_steer_basis_angles3d(N, direction_cosines):
@@ -12,6 +63,7 @@ def compute_steer_basis_angles3d(N, direction_cosines):
     steer_angles = compute_direction_angle_powers(N, direction_cosines)
 
     return steer_angles
+
 
 def compute_direction_angle_powers(N, directions):
     M = int((N+1)*(N+2)/2)
@@ -34,6 +86,7 @@ def compute_direction_angle_powers(N, directions):
                                     steer_gamma)
 
     return directions_powers    
+
 
 def direction_cosine_powers3d(N):
     M = int((N+1)*(N+2)/2)
@@ -60,7 +113,8 @@ def make_steer_basis3d(filt, steer_direction_array):
         steer_filt_hypervolume[:,:,:,ifilt] = steer_filt
         
     return steer_filt_hypervolume
-        
+
+
 def rotate_filter3d(filt, target_direction, start_direction = (0, 0, 1)):
     
     target_direction = np.array(target_direction)
@@ -81,6 +135,7 @@ def rotate_filter3d(filt, target_direction, start_direction = (0, 0, 1)):
     rotated_filt = ndimg.rotate(rotated_filt, z2, [0,1], reshape = False)
     
     return rotated_filt
+
 
 def get_rotation_matrix(start_direction, target_direction):
     # first write in axis angle form
@@ -103,6 +158,7 @@ def get_rotation_matrix(start_direction, target_direction):
                                   *(1-cosTheta)]])
     
     return rotation_matrix
+
 
 def get_euler_angles(rotation_matrix):  
     r = R.from_dcm(np.array(rotation_matrix))

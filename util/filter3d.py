@@ -6,6 +6,7 @@ Created on Thu Oct 17 16:03:22 2019
 """
 import numpy as np
 
+
 def make_filter(n, r0, sigma_denom, f, phi):
     
     filter_range = np.array(np.arange(-n,n+1))
@@ -13,7 +14,8 @@ def make_filter(n, r0, sigma_denom, f, phi):
     R = np.sqrt(np.power(X,2)+np.power(Y,2)+np.power(Z,2))
     sigma = n / sigma_denom
     
-    g = np.exp(-np.power(R-r0,2) / (2*(np.power(sigma,2))))
+    # g = np.exp(-np.power(R-r0,2) / (2*(np.power(sigma,2))))
+    g = np.ones(X.shape)
     
     u, v, w = project_to_sphere(X, Y, Z)
     
@@ -26,8 +28,7 @@ def make_filter(n, r0, sigma_denom, f, phi):
     
     filt = np.multiply(g, spherical_vals)
     return filt
-    
-    
+
     
 def project_to_sphere(X, Y, Z):
     SMALL_CONSTANT = 1e-8
