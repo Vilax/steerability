@@ -27,7 +27,7 @@ sys.path.insert(0, '../util')
 # polynomial
 
 N = 4
-cap_size = np.pi/2.1 #3.5
+cap_size = np.pi/9.0
 r0 = 20
 sigma = 5
 filtSize = 200
@@ -36,7 +36,7 @@ direction = [0, 0, 1]
 
 wavelength = 10
 angle = 1
-xdim, ydim, zdim = 200, 200, 200
+xdim, ydim, zdim = 201, 201, 201
 direction = [0, 1, 0]
 
 mu, sigma = 0, 0.5
@@ -60,10 +60,9 @@ imgNoise_fft2 = np.fft.fftn(imgNoise2)
 imgNoise_fft2 = np.fft.fftshift(imgNoise_fft2)
 
 uf.representImg((imgNoise1[:,:,100]), 'fringes', True)
-
-dirFilt = steer.directionalFilter3D(N, cap_size, r0, sigma, direction, xdim)
+filtSize = imgNoise1.shape[0]
+dirFilt = steer.directionalFilter3D(N, cap_size, r0, sigma, direction, filtSize)
 uf.representImg((dirFilt[:,:,100]), 'fringes', True)
-print(dirFilt.shape)
 
 # Aplying a filter to the image
 fft_filt1 = np.multiply(dirFilt, imgNoise_fft1)
@@ -73,5 +72,5 @@ timestep = 1
 FreqCompRows = np.fft.fftfreq(imgNoise1.shape[0], d=timestep)
 FreqCompCols = np.fft.fftfreq(imgNoise1.shape[1], d=timestep)
 freq = FreqCompCols[FreqCompCols>0]
-
+# print(1/freq)
 FSC, resolution = res.estimateFSC(imgNoise_fft1, imgNoise_fft2, freq, 0.143, True)

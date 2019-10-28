@@ -33,12 +33,10 @@ def estimateGaborFRC(half1, half2, sigma, freq, threshold, HPF = True):
         FSC[i] = num/den
     #     if i % 50 ==0:
     #         representImg(ring, 'gabor', False)
+
     idx = FSC <= threshold
     idx = freq[idx]
     resolution = 1 / idx[0]
-    # uf.representCurve(freq, FSC, 'FSC', True)
-
-    # print('resolution = ', resolution)
 
     return FSC, resolution
 

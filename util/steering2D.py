@@ -11,8 +11,8 @@ import util.utilFuntions as uf
 import random
 import scipy as sp
 from scipy import linalg, interpolate, misc
-# import skimage as sk
-# from skimage.transform import rotate
+import skimage as sk
+from skimage.transform import rotate
 
 
 def directionalFilter2D(N, cap, r0, sigma, direction, filtSize):
@@ -22,6 +22,7 @@ def directionalFilter2D(N, cap, r0, sigma, direction, filtSize):
     # sigma, si the standard deviation of the gaussian which defines the frequencies
     # direction in radians
 
+    print('filtSize = ', filtSize)
     Theta = np.pi / cap
 
     f, u, bCos, theta = steer2dGeneral(Theta, N)
@@ -58,7 +59,7 @@ def directionalFilter2D(N, cap, r0, sigma, direction, filtSize):
     steeredFilt = steeredFilt/np.max(steeredFilt)
 
     angleCritic, fillingValue = estimateFilterWidth2D(steeredFilt, direction)
-    steeredFilt = maskrippling(steeredFilt, direction, filtSize, angleCritic, fillingValue)
+    steeredFilt = maskrippling2D(steeredFilt, direction, filtSize, angleCritic, fillingValue)
     mask = uf.create_circular_mask(steeredFilt.shape[0], steeredFilt.shape[0])
 
     steeredFilt = np.multiply(steeredFilt, mask)
@@ -132,7 +133,7 @@ def estimateFilterWidth3D(filter, direction):
     return angleCritic, value
 
 
-def maskrippling(steeredFilt, direction, filtSize, angleCritic, value):
+def maskrippling2D(steeredFilt, direction, filtSize, angleCritic, value):
     # Directional filters based on steerability usualy present a rippling
     # this function mask that rippling, resulting in a monotonic and
     # smooth directional filter.
@@ -140,22 +141,10 @@ def maskrippling(steeredFilt, direction, filtSize, angleCritic, value):
     nn = np.arange(-filtSize, filtSize, 1)
     x, y = np.meshgrid(nn, nn)
 
-    # x = np.true_divide(x, np.sqrt(x ** 2 + y ** 2))
-
     angleCone = -(np.arctan2(y, x))
-    # import matplotlib.pyplot as plt
-    # plt.figure()
-    # plt.imshow(angleCone * 180 / np.pi)
-    # plt.title('angles')
-    # plt.show()
 
     idx1 = np.abs(angleCone - direction) > angleCritic
     idx2 = np.flipud(np.fliplr(idx1))
-
-    # plt.figure()
-    # plt.imshow(idx1)
-    # plt.title('idx1')
-    # plt.show()
 
     idx = np.logical_and(idx1, idx2)
     steeredFilt[idx] = value

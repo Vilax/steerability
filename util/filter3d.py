@@ -7,12 +7,13 @@ Created on Thu Oct 17 16:03:22 2019
 import numpy as np
 
 
-def make_filter(n, r0, sigma_denom, f, phi):
-    
-    filter_range = np.array(np.arange(-n,n+1))
+def make_filter(filtSize, r0, sigma_denom, f, phi):
+    filter_range = np.arange(-filtSize, filtSize, 1)
+    # filter_range = np.array(np.arange(-n,n+1))
+    print('filter_range.shape = ', filter_range.shape)
     X, Y, Z = np.meshgrid(filter_range, filter_range, filter_range)
     R = np.sqrt(np.power(X,2)+np.power(Y,2)+np.power(Z,2))
-    sigma = n / sigma_denom
+    sigma = filtSize / sigma_denom
     
     # g = np.exp(-np.power(R-r0,2) / (2*(np.power(sigma,2))))
     g = np.ones(X.shape)

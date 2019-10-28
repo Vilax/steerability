@@ -17,11 +17,8 @@ def directionalFilter3D(N, cap, r0, sigma, direction, filtSize):
     # direction in radians
 
     f, v, bCos, phi = poly3d.steerable_polynomial3d(cap, N)
-
     filtSize = int(filtSize) / 2  # in pixels
-
     orig_filt = filt.make_filter(filtSize, r0, sigma, f, phi)
-    print(orig_filt.shape)
     img = orig_filt[:, 100, :]
     uf.representImg(img, 'Filter', True)
 
@@ -39,7 +36,7 @@ def directionalFilter3D(N, cap, r0, sigma, direction, filtSize):
     axis_sym = axis_sym / np.linalg.norm(axis_sym)
     alpha, beta, gamma = axis_sym
 
-    axis_sym = [1, 0, 0]
+    axis_sym = direction/np.linalg.norm(axis_sym)
     direction_angles = compute_direction_angle_powers(N, axis_sym)
 
     k = Phi * direction_angles
@@ -49,8 +46,8 @@ def directionalFilter3D(N, cap, r0, sigma, direction, filtSize):
     steeredFilt = steeredFilt / np.max(steeredFilt)
 
     angleCritic, fillingValue = estimateFilterWidth3D(steeredFilt, direction)
-    print(angleCritic*180/np.pi, " ", fillingValue)
-    # steeredFilt = maskrippling(steeredFilt, direction, filtSize, angleCritic, fillingValue)
+    print("angleCritic =", angleCritic*180/np.pi, " ", fillingValue)
+    steeredFilt = maskrippling3D(steeredFilt, direction, filtSize, angleCritic, fillingValue)
     mask = uf.create_spherical_mask(steeredFilt.shape[0], steeredFilt.shape[1], steeredFilt.shape[2])
 
     steeredFilt = np.multiply(steeredFilt, mask)
@@ -79,6 +76,26 @@ def rotationAroundAxis(axisVector, angle):
     return rotation
 
 
+def maskrippling3D(steeredFilt, direction, filtSize, angleCritic, value):
+    # Directional filters based on steerability usualy present a rippling
+    # this function mask that rippling, resulting in a monotonic and
+    # smooth directional filter.
+
+    direction = direction/np.linalg.norm(direction)
+    nn = np.arange(-filtSize, filtSize, 1)
+    x, y, z = np.meshgrid(nn, nn, nn)
+    r = np.sqrt(x**2 + y**2 + z**2)
+
+    x = np.arccos(np.true_divide( np.abs(np.multiply(x, direction[0]) + np.multiply(y, direction[1]) + np.multiply(z, direction[2])), r))
+
+    uf.representImg(x[:,:,100],'angles', True)
+    idx = x < angleCritic
+
+    steeredFilt[idx] = value
+
+    return steeredFilt
+
+
 def estimateFilterWidth3D(filter, direction):
     # Center of the image
     center_dir = int(np.floor(0.5 * filter.shape[0]))
@@ -95,7 +112,7 @@ def estimateFilterWidth3D(filter, direction):
     axisVector = np.cross(eyeMat[:,ind], direction)
     axisVector = axisVector/ np.linalg.norm(direction)
 
-    print(axisVector,".-.-.-.-")
+    print(axisVector, ".-.-.-.-")
 
     r = (center_dir * 2/3) * direction
 
@@ -104,10 +121,11 @@ def estimateFilterWidth3D(filter, direction):
     last_idx_x = np.int(center_dir + r[0])
     last_idx_y = np.int(center_dir + r[1])
     last_idx_z = np.int(center_dir + r[2])
+    print("Init idx_x ", last_idx_x, "  idx_y ", last_idx_y, "  idx_z ", last_idx_z)
 
     angleCritic = 0
-
-    # valuetest = np.array([])
+    value = 0
+    valuetest = np.array([])
     ran = np.arange(0, np.pi / 2, np.pi / 180)
     lastAngle = ran[0]
     for theta in ran:
@@ -117,8 +135,9 @@ def estimateFilterWidth3D(filter, direction):
         idx_x = np.int(center_dir + r_rotated[0])
         idx_y = np.int(center_dir + r_rotated[1])
         idx_z = np.int(center_dir + r_rotated[2])
+        # print("idx_x ", idx_x, "  idx_y ", idx_y, "  idx_z ", idx_z)
 
-        # valuetest = np.append(valuetest, [filter[idx_x, idx_y]])
+        valuetest = np.append(valuetest, [filter[idx_x, idx_y, idx_z]])
 
         if filter[idx_x, idx_y, idx_z] > filter[last_idx_x, last_idx_y, last_idx_z]:
             angleCritic = lastAngle
@@ -129,6 +148,7 @@ def estimateFilterWidth3D(filter, direction):
         last_idx_y = idx_y
         last_idx_z = idx_z
 
+    uf.representCurve(np.arange(0,len(valuetest),1), valuetest, 'filter_size', True)
     return angleCritic, value
 
 

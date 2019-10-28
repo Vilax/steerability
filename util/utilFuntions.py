@@ -9,8 +9,9 @@ import numpy as np
 
 
 def paddingImageIfIsOdd(img):
+    # The input image/volume is padded to have odd dimensions along all axis
+
     dims = len(img.shape)
-    print('Original Image', img.shape)
     if dims == 2:
         if (img.shape[0] % 2) == 0:
             imgPadded = np.pad(img, ((0, 1), (0, 0)), 'edge')
@@ -18,8 +19,7 @@ def paddingImageIfIsOdd(img):
             imgPadded = img
         if (img.shape[1] % 2) == 0:
             imgPadded = np.pad(imgPadded, ((0, 0), (0, 1)), 'edge')
-
-
+    print("img = ", img.shape)
     if dims == 3:
         if (img.shape[0] % 2) == 0:
             imgPadded = np.pad(img, ((0, 1), (0, 0), (0, 0)), 'edge')
@@ -43,7 +43,7 @@ def paddingImageIfIsOdd(img):
             # imgPadded = np.pad(imgPadded, ((0, 0), (0, 0), (0, 1)), 'constant', constant_values=(0,))
             # imgPadded[:-1, -1] = lastcol
             # imgPadded[-1, -1] = 0.5 * (lastrow[-1] + lastcol[-1])
-        print('Padded Image', imgPadded.shape)
+        print("imgPadded = ", imgPadded.shape)
     return imgPadded
 
 

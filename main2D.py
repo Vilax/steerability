@@ -17,10 +17,10 @@ import util.steering2D as ste
 
 # Defining image parameters
 xdim = 512
-ydim = 512
+ydim = 513
 wavelength = 5
 angle = 0
-mu, sigma = 0, 0
+mu, sigma = 0, 0.5
 
 # Reading Image:
 
@@ -40,7 +40,7 @@ imgNoise1 = uf.paddingImageIfIsOdd(imgNoise1)
 imgNoise2 = uf.paddingImageIfIsOdd(imgNoise2)
 uf.representImg(imgNoise1, 'original Image Img1', True)
 
-"""
+
 # Fourier transform of the image
 imgNoise_fft1 = np.fft.fft2(imgNoise1)
 imgNoise_fft1 = np.fft.fftshift(imgNoise_fft1)
@@ -61,18 +61,22 @@ r0 = 150
 sigma = 5.0
 cap = 2.0
 N = 4
-filtSize = xdim
+filtSize = imgNoise1.shape[0]
 print("filtSize", filtSize)
 
-direction = np.pi/10
+direction = 0.0#np.pi/10
 dirFilt = ste.directionalFilter2D(N, cap, r0, sigma, direction, filtSize)
+print(dirFilt.shape)
+print(imgNoise_fft1.shape)
 
 # # Aplying a filter to the image
 fft_filt1 = np.multiply(dirFilt, imgNoise_fft1)
 fft_filt2 = np.multiply(dirFilt, imgNoise_fft2)
-FSC, resolution = res.estimateLocalFRC(imgNoise_fft1, imgNoise_fft2, FreqCompCols, 0.143, True)
+FSC, resolution = res.estimateFRC(imgNoise_fft1, imgNoise_fft2, freq, 0.143, True)
+uf.representCurve(freq, FSC, 'FSCnormal', False)
 print('Normal HPF resolution = ', resolution)
 FSC, resolution = res.estimateGaborFRC(imgNoise_fft1, imgNoise_fft2, 2, freq, 0.143, True)
+uf.representCurve(freq, FSC, 'FSCnormal', False)
 print('Gabor HPF resolution = ', resolution)
 FSC, resolution = res.estimateFRC(imgNoise_fft1, imgNoise_fft2, freq, 0.143, False)
 print('Normal resolution = ', resolution)
@@ -102,4 +106,3 @@ uf.representCurve(freq, FSC, 'FSCGabor', True)
 #     # plt.title("FSC dir"+str(count))
 #
 # plt.show()
-"""
