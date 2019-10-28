@@ -119,5 +119,34 @@ def estimateLocalFRC(half1, half2, freq, threshold, HPF = True):
     return freq
 
 
+def estimateFSC(half1, half2, freq, threshold, HPF = True):
+    assert half1.shape == half2.shape, 'Halves has not the same dimensions'
+
+    xdim = half1.shape[0]
+    ydim = half1.shape[1]
+    zdim = half1.shape[2]
+    dim = int(np.floor(min(xdim, ydim, zdim)/2))
+
+    F1 = half1
+    F2 = np.conj(half2)
+
+    FSC = np.zeros(dim)
+    for i in range(0, dim):
+
+        if HPF is True:
+            ring = uf.createShellHPF(xdim, ydim, zdim, i)
+        else:
+            ring = uf.createShell(xdim, ydim, zdim, i)
+        f1 = F1[ring]
+        f2 = F2[ring]
+        num = np.sum( np.real( np.multiply( f1, f2) ) )
+        den = np.linalg.norm(f1) * np.linalg.norm(f2)
+        FSC[i] = num/den
+    idx = (FSC <= threshold)
+    idx = freq[idx]
+    resolution = 1/idx[0]
+    print('resolution = ', resolution)
+
+    return FSC, resolution
 
 

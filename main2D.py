@@ -16,17 +16,17 @@ import util.steering2D as ste
 
 
 # Defining image parameters
-xdim = 513
-ydim = 513
+xdim = 512
+ydim = 512
 wavelength = 5
 angle = 0
-mu, sigma = 0, 0.5
+mu, sigma = 0, 0
 
 # Reading Image:
 
 # Defining a fringe pattern
-img1 = TstFun.define_sinusoidal_pattern(wavelength, angle, xdim, ydim)
-img2 = TstFun.define_sinusoidal_pattern(wavelength, angle, xdim, ydim)
+img1 = TstFun.define_sinusoidal_pattern(wavelength, xdim, ydim, 1, 0.0)
+img2 = TstFun.define_sinusoidal_pattern(wavelength, xdim, ydim, 1, 0.0)
 
 # adding noise to the fringe pattern
 imgNoise1 = TstFun.add_gaussian_noise(img1, mu, sigma)
@@ -38,7 +38,9 @@ imgNoise2 = TstFun.add_gaussian_noise(img2, mu, sigma)
 # Ensuring odd dimensions for the fft
 imgNoise1 = uf.paddingImageIfIsOdd(imgNoise1)
 imgNoise2 = uf.paddingImageIfIsOdd(imgNoise2)
+uf.representImg(imgNoise1, 'original Image Img1', True)
 
+"""
 # Fourier transform of the image
 imgNoise_fft1 = np.fft.fft2(imgNoise1)
 imgNoise_fft1 = np.fft.fftshift(imgNoise_fft1)
@@ -100,3 +102,4 @@ uf.representCurve(freq, FSC, 'FSCGabor', True)
 #     # plt.title("FSC dir"+str(count))
 #
 # plt.show()
+"""

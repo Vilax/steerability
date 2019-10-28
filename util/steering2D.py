@@ -11,8 +11,8 @@ import util.utilFuntions as uf
 import random
 import scipy as sp
 from scipy import linalg, interpolate, misc
-import skimage as sk
-from skimage.transform import rotate
+# import skimage as sk
+# from skimage.transform import rotate
 
 
 def directionalFilter2D(N, cap, r0, sigma, direction, filtSize):
@@ -57,7 +57,7 @@ def directionalFilter2D(N, cap, r0, sigma, direction, filtSize):
     steeredFilt = np.abs(np.sum((np.multiply(steerFiltVol, steerCoeff)), axis=2))
     steeredFilt = steeredFilt/np.max(steeredFilt)
 
-    angleCritic, fillingValue = estimateFilterWidth(steeredFilt, direction)
+    angleCritic, fillingValue = estimateFilterWidth2D(steeredFilt, direction)
     steeredFilt = maskrippling(steeredFilt, direction, filtSize, angleCritic, fillingValue)
     mask = uf.create_circular_mask(steeredFilt.shape[0], steeredFilt.shape[0])
 
@@ -66,7 +66,40 @@ def directionalFilter2D(N, cap, r0, sigma, direction, filtSize):
     return steeredFilt
 
 
-def estimateFilterWidth(filter, direction):
+def estimateFilterWidth2D(filter, direction):
+    # Center of the image
+    center_dir = int(np.floor(0.5 * filter.shape[0]))
+
+    r = (center_dir * 2/3) * np.transpose([np.sin(direction), -np.cos(direction)])
+
+    last_idx_x = np.int(center_dir + r[0])
+    last_idx_y = np.int(center_dir + r[1])
+
+    angleCritic = 0
+
+    # valuetest = np.array([])
+    ran = np.arange(0, np.pi / 2, np.pi / 180)
+    lastAngle = ran[0]
+    for theta in ran:
+        rotMatrix = [[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]]
+        r_rotated = np.dot(rotMatrix, r)
+
+        idx_x = np.int(center_dir + r_rotated[0])
+        idx_y = np.int(center_dir + r_rotated[1])
+
+        # valuetest = np.append(valuetest, [filter[idx_x, idx_y]])
+
+        if filter[idx_x, idx_y] > filter[last_idx_x, last_idx_y]:
+            angleCritic = lastAngle
+            value = filter[last_idx_x, last_idx_y]
+            break
+        lastAngle = theta
+        last_idx_x = idx_x
+        last_idx_y = idx_y
+    return angleCritic, value
+
+
+def estimateFilterWidth3D(filter, direction):
     # Center of the image
     center_dir = int(np.floor(0.5 * filter.shape[0]))
 

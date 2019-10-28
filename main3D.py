@@ -15,6 +15,8 @@ from numpy import linalg as npla
 # from scipy import ndimage as ndimg
 import sys
 import util.steering3D as steer
+import util.testFunctions as Tsf
+import util.resolution as res
 import util.filter3d as filt
 import util.polynomial3d as poly3d
 import mrcfile
@@ -25,11 +27,51 @@ sys.path.insert(0, '../util')
 # polynomial
 
 N = 4
-cap_size = np.pi/3.5
+cap_size = np.pi/2.1 #3.5
 r0 = 20
 sigma = 5
 filtSize = 200
 
 direction = [0, 0, 1]
 
-Dirfilt = steer.directionalFilter3D(N, cap_size, r0, sigma, direction, filtSize)
+wavelength = 10
+angle = 1
+xdim, ydim, zdim = 200, 200, 200
+direction = [0, 1, 0]
+
+mu, sigma = 0, 0.5
+
+# Defining a fringe pattern
+vol1 = Tsf.define_sinusoidal_pattern(wavelength, xdim, ydim, zdim, direction)
+vol2 = Tsf.define_sinusoidal_pattern(wavelength, xdim, ydim, zdim, direction)
+
+# adding noise to the fringe pattern
+imgNoise1 = Tsf.add_gaussian_noise(vol1, mu, sigma)
+imgNoise2 = Tsf.add_gaussian_noise(vol2, mu, sigma)
+
+# # Ensuring odd dimensions for the fft
+imgNoise1 = uf.paddingImageIfIsOdd(imgNoise1)
+imgNoise2 = uf.paddingImageIfIsOdd(imgNoise2)
+
+# Fourier transform of the image
+imgNoise_fft1 = np.fft.fftn(imgNoise1)
+imgNoise_fft1 = np.fft.fftshift(imgNoise_fft1)
+imgNoise_fft2 = np.fft.fftn(imgNoise2)
+imgNoise_fft2 = np.fft.fftshift(imgNoise_fft2)
+
+uf.representImg((imgNoise1[:,:,100]), 'fringes', True)
+
+dirFilt = steer.directionalFilter3D(N, cap_size, r0, sigma, direction, xdim)
+uf.representImg((dirFilt[:,:,100]), 'fringes', True)
+print(dirFilt.shape)
+
+# Aplying a filter to the image
+fft_filt1 = np.multiply(dirFilt, imgNoise_fft1)
+fft_filt2 = np.multiply(dirFilt, imgNoise_fft2)
+
+timestep = 1
+FreqCompRows = np.fft.fftfreq(imgNoise1.shape[0], d=timestep)
+FreqCompCols = np.fft.fftfreq(imgNoise1.shape[1], d=timestep)
+freq = FreqCompCols[FreqCompCols>0]
+
+FSC, resolution = res.estimateFSC(imgNoise_fft1, imgNoise_fft2, freq, 0.143, True)
