@@ -86,10 +86,10 @@ def maskrippling3D(steeredFilt, direction, filtSize, angleCritic, value):
     x, y, z = np.meshgrid(nn, nn, nn)
     r = np.sqrt(x**2 + y**2 + z**2)
 
-    x = np.arccos(np.true_divide( np.abs(np.multiply(x, direction[0]) + np.multiply(y, direction[1]) + np.multiply(z, direction[2])), r))
+    x = np.arccos(np.true_divide( np.abs(np.multiply(y, direction[0]) + np.multiply(x, direction[1]) + np.multiply(z, direction[2])), r))
 
     uf.representImg(x[:,:,100],'angles', True)
-    idx = x < angleCritic
+    idx = x > angleCritic
 
     steeredFilt[idx] = value
 
