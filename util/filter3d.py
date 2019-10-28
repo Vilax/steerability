@@ -17,8 +17,11 @@ def make_filter(filtSize, r0, sigma_denom, f, phi):
     
     # g = np.exp(-np.power(R-r0,2) / (2*(np.power(sigma,2))))
     g = np.ones(X.shape)
-    
+    import time
+    start = time.time()
     u, v, w = project_to_sphere(X, Y, Z, R)
+    end = time.time()
+    print("Time", end-start)
     
     angles = np.arccos(w)
     a = np.reshape(angles, (np.size(angles), 1))
@@ -35,8 +38,8 @@ def project_to_sphere(X, Y, Z, R):
     SMALL_CONSTANT = 1e-8
     R = R+SMALL_CONSTANT
     
-    u = np.true_divide(X, R)
-    v = np.true_divide(Y, R)
-    w = np.true_divide(Z, R)
+    u = np.divide(X, R)
+    v = np.divide(Y, R)
+    w = np.divide(Z, R)
     
     return u, v, w

@@ -41,28 +41,6 @@ xdim, ydim, zdim = 201, 201, 201
 direction = [1, 1, 0]
 
 mu, sigma = 0, 0.5
-import time
-
-filter_range = np.arange(-filtSize, filtSize, 1)
-X, Y, Z = np.meshgrid(filter_range, filter_range, filter_range)
-start = time.time()
-a = uf.s1(X)
-end = time.time()
-print(end - start)
-start = time.time()
-b = uf.s2(X)
-end = time.time()
-print(end - start)
-start = time.time()
-c = uf.s3(X)
-end = time.time()
-print(end - start)
-
-start = time
-
-
-
-
 
 # Defining a fringe pattern
 vol1 = Tsf.define_sinusoidal_pattern(wavelength, xdim, ydim, zdim, direction)
