@@ -15,20 +15,32 @@ def directionalFilter3D(N, cap, r0, sigma, direction, filtSize):
     # The angle of the filter is defined as pi/cap
     # sigma, si the standard deviation of the gaussian which defines the frequencies
     # direction in radians
+    import time
 
     f, v, bCos, phi = poly3d.steerable_polynomial3d(cap, N)
     filtSize = int(filtSize) / 2  # in pixels
+    start = time.time()
     orig_filt = filt.make_filter(filtSize, r0, sigma, f, phi)
+    end = time.time()
+    print('Total Time ', end - start)
     img = orig_filt[:, 100, :]
     uf.representImg(img, 'Filter', True)
 
     direction_cosines = np.loadtxt('3d_direction_cosines_N4.txt')
+    start = time.time()
     steer_basis_hypervol = make_steer_basis3d(orig_filt, direction_cosines)
+    end = time.time()
+    print('Total Time ', end - start)
     num_basis_filters = steer_basis_hypervol.shape[3]
 
+    start = time.time()
     steer_basis_angles = compute_steer_basis_angles3d(N, direction_cosines)
+    end = time.time()
+    print('Total Time ', end - start)
+    start = time.time()
     Phi = np.linalg.inv(steer_basis_angles)
-
+    end = time.time()
+    print('Total Time ', end - start)
     sym_test_axes = np.array([[1, 2, 3], [3, 4, 5]])
     nAxes = sym_test_axes.shape[0]
     iaxis = sym_test_axes[0, :]
@@ -37,13 +49,17 @@ def directionalFilter3D(N, cap, r0, sigma, direction, filtSize):
     alpha, beta, gamma = axis_sym
 
     axis_sym = direction/np.linalg.norm(axis_sym)
+    start = time.time()
     direction_angles = compute_direction_angle_powers(N, axis_sym)
-
+    end = time.time()
+    print('Total Time ', end - start)
     k = Phi * direction_angles
     k = np.ndarray.flatten(np.array(k))
 
     steeredFilt = np.abs(np.dot(steer_basis_hypervol, k))
     steeredFilt = steeredFilt / np.max(steeredFilt)
+
+    uf.representImg(steeredFilt[:,:,100], 'testDir', True)
 
     angleCritic, fillingValue = estimateFilterWidth3D(steeredFilt, direction)
     print("angleCritic =", angleCritic*180/np.pi, " ", fillingValue)
@@ -88,7 +104,7 @@ def maskrippling3D(steeredFilt, direction, filtSize, angleCritic, value):
 
     x = np.arccos(np.true_divide( np.abs(np.multiply(y, direction[0]) + np.multiply(x, direction[1]) + np.multiply(z, direction[2])), r))
 
-    uf.representImg(x[:,:,100],'angles', True)
+    # uf.representImg(x[:,:,100],'angles', True)
     idx = x > angleCritic
 
     steeredFilt[idx] = value
@@ -112,11 +128,7 @@ def estimateFilterWidth3D(filter, direction):
     axisVector = np.cross(eyeMat[:,ind], direction)
     axisVector = axisVector/ np.linalg.norm(direction)
 
-    print(axisVector, ".-.-.-.-")
-
     r = (center_dir * 2/3) * direction
-
-    print('r  ', r)
 
     last_idx_x = np.int(center_dir + r[0])
     last_idx_y = np.int(center_dir + r[1])

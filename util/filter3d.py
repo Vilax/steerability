@@ -12,13 +12,13 @@ def make_filter(filtSize, r0, sigma_denom, f, phi):
     # filter_range = np.array(np.arange(-n,n+1))
     print('filter_range.shape = ', filter_range.shape)
     X, Y, Z = np.meshgrid(filter_range, filter_range, filter_range)
-    R = np.sqrt(np.power(X,2)+np.power(Y,2)+np.power(Z,2))
+    R = np.sqrt(X**2 + Y**2 + Z**2)
     sigma = filtSize / sigma_denom
     
     # g = np.exp(-np.power(R-r0,2) / (2*(np.power(sigma,2))))
     g = np.ones(X.shape)
     
-    u, v, w = project_to_sphere(X, Y, Z)
+    u, v, w = project_to_sphere(X, Y, Z, R)
     
     angles = np.arccos(w)
     a = np.reshape(angles, (np.size(angles), 1))
@@ -31,12 +31,12 @@ def make_filter(filtSize, r0, sigma_denom, f, phi):
     return filt
 
     
-def project_to_sphere(X, Y, Z):
+def project_to_sphere(X, Y, Z, R):
     SMALL_CONSTANT = 1e-8
-    r = np.sqrt(np.power(X,2)+np.power(Y,2)+np.power(Z,2))+SMALL_CONSTANT
+    R = R+SMALL_CONSTANT
     
-    u = np.divide(X, r)
-    v = np.divide(Y, r)
-    w = np.divide(Z, r)
+    u = np.true_divide(X, R)
+    v = np.true_divide(Y, R)
+    w = np.true_divide(Z, R)
     
     return u, v, w

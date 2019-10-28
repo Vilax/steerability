@@ -105,16 +105,15 @@ def createGaussian(filterSize, sigma, r0):
 def create_spherical_mask(xdim, ydim, zdim, center=None, radius=None):
 
     if center is None: # use the middle of the image
-        center = [int(xdim/2), int(ydim/2), int(zdim)/2]
+        center = [int(xdim/2), int(ydim/2), int(zdim/2)]
     if radius is None: # use the smallest distance between the center and image walls
         radius = min(center[0], center[1], center[2], xdim-center[0], ydim-center[1], zdim-center[2])
-
+    print(center)
     Z, Y, X = np.ogrid[:xdim, :ydim, :zdim]
     dist_from_center = np.sqrt((X - center[0])**2 + (Y-center[1])**2 + (Z - center[2])**2 )
 
-    # img = dist_from_center[:,:,100]
-    # representImg(img, 'mask', True)
     mask = dist_from_center <= radius
+
     return mask
 
 
