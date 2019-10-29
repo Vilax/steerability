@@ -24,7 +24,7 @@ import mrcfile
 # polynomial
 
 N = 4
-cap_size = math.pi/3.5
+cap_size = math.pi/9
 
 f, v, bCos, phi = poly3d.steerable_polynomial3d(cap_size, N)
 
