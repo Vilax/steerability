@@ -88,9 +88,9 @@ options = optimset('PlotFcns',@optimplotfval);
 [x,fval] = fminsearch(func, xinit, options);
 
 
-approximator = (exp(-((R-z0)/(n/x(1))).^2)) .* ... 
-            (polyval([x(4),x(3),x(2)],(R-z0))) .* ...
-            (polyval([x(6),0, x(5),0,0], cosPhi));
+    approximator = (exp(-((R-z0)/(n/x(1))).^2)) .* ... 
+                (polyval([x(4),x(3),x(2)],(R-z0))) .* ...
+                (polyval([x(6),0, x(5),0,0], cosPhi));
 
-WriteMRC(gaborEvenFT3D, 1, 'gaborFiltEven3D.mrc')
-WriteMRC(approximator, 1, 'gaborApproximatorEven3D.mrc')
+    WriteMRC(gaborEvenFT3D, 1, 'gaborFiltEven3D.mrc')
+    WriteMRC(approximator, 1, 'gaborApproximatorEven3D.mrc')

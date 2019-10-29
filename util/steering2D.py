@@ -7,7 +7,7 @@ Created on Thu Sep 26 11:22:57 2019
 """
 import numpy as np
 import numpy.matlib as npm
-import utilFuntions as uf
+import util.utilFuntions as uf
 import random
 import scipy as sp
 from scipy import linalg, interpolate, misc
@@ -22,6 +22,7 @@ def directionalFilter2D(N, cap, r0, sigma, direction, filtSize):
     # sigma, si the standard deviation of the gaussian which defines the frequencies
     # direction in radians
 
+    print('filtSize = ', filtSize)
     Theta = np.pi / cap
 
     f, u, bCos, theta = steer2dGeneral(Theta, N)
@@ -57,8 +58,8 @@ def directionalFilter2D(N, cap, r0, sigma, direction, filtSize):
     steeredFilt = np.abs(np.sum((np.multiply(steerFiltVol, steerCoeff)), axis=2))
     steeredFilt = steeredFilt/np.max(steeredFilt)
 
-    angleCritic, fillingValue = estimateFilterWidth(steeredFilt, direction)
-    steeredFilt = maskrippling(steeredFilt, direction, filtSize, angleCritic, fillingValue)
+    angleCritic, fillingValue = estimateFilterWidth2D(steeredFilt, direction)
+    steeredFilt = maskrippling2D(steeredFilt, direction, filtSize, angleCritic, fillingValue)
     mask = uf.create_circular_mask(steeredFilt.shape[0], steeredFilt.shape[0])
 
     steeredFilt = np.multiply(steeredFilt, mask)
@@ -66,7 +67,7 @@ def directionalFilter2D(N, cap, r0, sigma, direction, filtSize):
     return steeredFilt
 
 
-def estimateFilterWidth(filter, direction):
+def estimateFilterWidth2D(filter, direction):
     # Center of the image
     center_dir = int(np.floor(0.5 * filter.shape[0]))
 
@@ -99,7 +100,40 @@ def estimateFilterWidth(filter, direction):
     return angleCritic, value
 
 
-def maskrippling(steeredFilt, direction, filtSize, angleCritic, value):
+def estimateFilterWidth3D(filter, direction):
+    # Center of the image
+    center_dir = int(np.floor(0.5 * filter.shape[0]))
+
+    r = (center_dir * 2/3) * np.transpose([np.sin(direction), -np.cos(direction)])
+
+    last_idx_x = np.int(center_dir + r[0])
+    last_idx_y = np.int(center_dir + r[1])
+
+    angleCritic = 0
+
+    # valuetest = np.array([])
+    ran = np.arange(0, np.pi / 2, np.pi / 180)
+    lastAngle = ran[0]
+    for theta in ran:
+        rotMatrix = [[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]]
+        r_rotated = np.dot(rotMatrix, r)
+
+        idx_x = np.int(center_dir + r_rotated[0])
+        idx_y = np.int(center_dir + r_rotated[1])
+
+        # valuetest = np.append(valuetest, [filter[idx_x, idx_y]])
+
+        if filter[idx_x, idx_y] > filter[last_idx_x, last_idx_y]:
+            angleCritic = lastAngle
+            value = filter[last_idx_x, last_idx_y]
+            break
+        lastAngle = theta
+        last_idx_x = idx_x
+        last_idx_y = idx_y
+    return angleCritic, value
+
+
+def maskrippling2D(steeredFilt, direction, filtSize, angleCritic, value):
     # Directional filters based on steerability usualy present a rippling
     # this function mask that rippling, resulting in a monotonic and
     # smooth directional filter.
@@ -107,22 +141,10 @@ def maskrippling(steeredFilt, direction, filtSize, angleCritic, value):
     nn = np.arange(-filtSize, filtSize, 1)
     x, y = np.meshgrid(nn, nn)
 
-    # x = np.true_divide(x, np.sqrt(x ** 2 + y ** 2))
-
     angleCone = -(np.arctan2(y, x))
-    # import matplotlib.pyplot as plt
-    # plt.figure()
-    # plt.imshow(angleCone * 180 / np.pi)
-    # plt.title('angles')
-    # plt.show()
 
     idx1 = np.abs(angleCone - direction) > angleCritic
     idx2 = np.flipud(np.fliplr(idx1))
-
-    # plt.figure()
-    # plt.imshow(idx1)
-    # plt.title('idx1')
-    # plt.show()
 
     idx = np.logical_and(idx1, idx2)
     steeredFilt[idx] = value

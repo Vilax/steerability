@@ -77,5 +77,6 @@ function [x, approximator, gaborSigma] = ...
         assert(numel(x) == 6)
         fval
     end
+    
 end
 
