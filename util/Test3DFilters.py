@@ -26,15 +26,9 @@ sys.path.insert(0, '../util')
 # polynomial
 
 N = 4
-<<<<<<< HEAD:util/Test3DFilters.py.orig
-<<<<<<< HEAD:scripts/main.py
-cap_size = math.pi/9
-=======
+
 cap_size = math.pi / 3.5
->>>>>>> 73f80e043656fa9a5313fefb2a0f4b437829b189:util/Test3DFilters.py
-=======
-cap_size = math.pi / 3.5
->>>>>>> 73f80e043656fa9a5313fefb2a0f4b437829b189:util/Test3DFilters.py
+
 
 f, v, bCos, phi = poly3d.steerable_polynomial3d(cap_size, N)
 
