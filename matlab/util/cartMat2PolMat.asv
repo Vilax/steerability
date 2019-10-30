@@ -1,0 +1,15 @@
+function polMat = cartMat2PolMat(cartMat, dims)
+% Given a matrix cartMat, converts to a matrix polMat whose column
+% coordinate is theta and whose row coordiante is r
+
+    xmin = dims(1);
+    xmax = dims(2);
+    ymin = dims(3);
+    ymax = dims(4);
+    
+    [X,Y] = meshgrid([xmin:xmax], [ymin:ymax]);
+    
+    R = sqrt(X.^2 + Y.^2);
+    
+end
+

@@ -13,7 +13,8 @@ function [x, approximator, gaborSigma, gaborFT] = ...
             nloops = DEFAULT_NLOOPS;
         end
     end
-    
+    [X,Y] = meshgrid(-n:n);
+    y0 = n/y0Denom;
     % first initialize gabor
     if isequal(parity, 'even')
         [x, approximator, gaborSigma] = approxGaborBCDEven(n,sigmaDenom,...
