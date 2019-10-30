@@ -1,10 +1,12 @@
 % first run gabor approximations
+close all; clear all;
 n=100;
-[x,approximator,gaborSigma,gaborFT]=approxGaborBCD(n,6,4,10,'even');
+[x,approxCache,gaborSigma,gaborFT]=approxGaborBCD(n,6,4,10,'even');
 
 assert(numel(x) == 6)
 b = [x(5), x(6)];
 angularPolyCoeff = [b(2), 0, b(1), 0];
+
 
 [X,Y] = meshgrid(-n:n);
 R = sqrt(X.^2+Y.^2);
@@ -45,6 +47,8 @@ figure; imagesc(radialPart)
 figure; imagesc(approximator)
 figure; contour(approximator,40)
 figure; mesh(approximator)
+figure; imagesc(gaborFT)
+figure; imagesc(approxCache)
 
 % now compute the bias of the maximum
 
@@ -57,3 +61,6 @@ approxMax = max(approximator(:));
 yapproxMax = i1
 
 bias = abs(j1-i1)
+
+diff = approximator - gaborFT;
+l2error = norm(diff(:),2)
