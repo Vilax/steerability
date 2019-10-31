@@ -31,6 +31,8 @@ function [x, approximator, gaborSigma] = ...
                 (polyval([x(6), 0, x(5), 0, 0], cosTheta))).^2, 2), 1);
     xinit = [sigmaDenom, 1, 0, 0, 0, 0];
     [x, fval] = fminsearch(initFun, xinit); 
+    x
+    fprintf('beginning loops')
     
     for iloop = 1:nloops
         sigma = x(1);
@@ -38,11 +40,11 @@ function [x, approximator, gaborSigma] = ...
         polyRfunc = @(a) sum(sum((gaborFT-(exp(-((R-y0)/(n/sigma)).^2)) ...
                  .* (polyval([a(3), a(2), a(1)], (R-y0))) .* ...
                 (polyval([b(2), 0, b(1), 0, 0], cosTheta))).^2, 2), 1);
-        ainit = [x(1), x(2), x(3)];
+        ainit = [x(2), x(3), x(4)];
         [a, fval] = fminsearch(polyRfunc, ainit);
         % collect optimum values
         
-        x = [sigma, a, b];
+        x = [sigma, a, b]
         assert(numel(x) == 6)
         
         polyAnglefunc = @(b) sum(sum((gaborFT-(exp(-((R-y0)/(n/sigma)).^2))...
@@ -51,7 +53,7 @@ function [x, approximator, gaborSigma] = ...
         binit = [x(5), x(6)];
         [b, fval] = fminsearch(polyAnglefunc, binit);
 
-        x = [sigma, a, b];
+        x = [sigma, a, b]
         assert(numel(x) == 6)
         approxSigmafunc = @(sigma) sum(sum((gaborFT - ...
                     (exp(-((R-y0)/(n/sigma)))) .* ...
@@ -60,7 +62,7 @@ function [x, approximator, gaborSigma] = ...
         sigmaInit = x(1);
         [sigma, fval] = fminsearch(approxSigmafunc, sigmaInit);
 
-        x = [sigma, a, b];
+        x = [sigma, a, b]
         assert(numel(x) == 6)
         approximator = (exp(-((R-y0)/(n/sigma)).^2)) .* ...
                     (polyval([a(3), a(2), a(1)], (R-y0))) .* ...
@@ -72,8 +74,8 @@ function [x, approximator, gaborSigma] = ...
         xinit = gaborSigma;
         [x, fval] = fminsearch(gaborAdjustSigmafunc, xinit);
         
-        gaborSigma = x; 
-        x = [sigma, a(1), a(2), a(3), b(1), b(2)];
+        gaborSigma = x 
+        x = [sigma, a(1), a(2), a(3), b(1), b(2)]
         assert(numel(x) == 6)
         fval
     end

@@ -1,9 +1,11 @@
 % first run gabor approximations
 close all; clear all;
 n=100;
-[x,approxCache,gaborSigma,gaborFT]=approxGaborBCD(n,6,4,10,'even');
+[x,approxCache,gaborSigma,gaborFT]=approxGaborBCD(n,6,3,10,'even');
 
 assert(numel(x) == 6)
+x(5)=0;
+x(6)=1;
 b = [x(5), x(6)];
 angularPolyCoeff = [b(2), 0, b(1), 0];
 
