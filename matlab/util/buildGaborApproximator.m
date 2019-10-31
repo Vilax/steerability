@@ -1,5 +1,6 @@
 function approximator = buildGaborApproximator(x, n, y0, parity)
 % BUILDGABORAPPROXIMATOR 
+% Suggestions
 
     DEFAULT_PARITY = 'odd';
     if nargin < 4
@@ -13,11 +14,11 @@ function approximator = buildGaborApproximator(x, n, y0, parity)
     cosTheta = cos(Theta);
     
     if isequal(parity, 'odd')
-        approximator = (exp(-((R-y0)/(n/x(1))).^2)) .* ...
+        approximator = (exp(-(R-y0).^2./(2*(n/x(1).^2)))) .* ...
                         (polyval([x(4), x(3), x(2)], (R-y0))) .* ...
                         (polyval([x(6), 0, x(5), 0], cosTheta));
     else
-        approximator = (exp(-((R-y0)/(n/x(1))).^2)) .* ...
+        approximator = (exp(-(R-y0).^2./(2*(n/x(1).^2)))) .* ...
                         (polyval([x(4), x(3), x(2)], (R-y0))) .* ...
                         (polyval([x(6), 0, x(5), 0, 0], cosTheta));
     end
