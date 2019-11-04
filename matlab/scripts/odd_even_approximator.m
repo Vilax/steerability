@@ -1,7 +1,7 @@
 % build odd polynomial that approximates an even polynomial, a sort of
 % parity reverse of 'testQP.m'
 
-n = 100;
+n = 299;
 dx = 1/n;
 x = [0:dx:1]';
 k = 4;
@@ -36,15 +36,15 @@ alpha = quadprog(H,f,A,b,Aeq,beq)
 mismatch=sqrt(alpha'*H*alpha)
 
 alpha_even = alpha;
-alpha_even(1:2:k)=0;
+alpha_even(2:2:k)=0;
 alpha_odd=alpha;
-alpha_odd(2:2:k)=0;
+alpha_odd(1:2:k)=0;
 alpha_mono=zeros(size(alpha));
 alpha_mono(2)=1;
 
 %Plot the polynomial
-y_odd=v*alpha_odd;
-y_even=-v*alpha_even;
+y_odd=-v*alpha_odd;
+y_even=v*alpha_even;
 y_mono=v*alpha_mono;
 
 figure(1);
@@ -76,8 +76,8 @@ for i=k:-1:1,
 end
 
 
-y_odd=v*alpha_odd;
-y_even=-v*alpha_even;
+y_odd=-v*alpha_odd;
+y_even=v*alpha_even;
 
 figure(3);
 hold off;
