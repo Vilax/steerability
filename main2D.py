@@ -13,6 +13,7 @@ import scipy as sp
 from scipy import fftpack, interpolate
 import matplotlib.pyplot as plt
 import util.steering2D as ste
+import util.polynomial3d as poly3
 
 
 # Defining image parameters
@@ -57,9 +58,9 @@ freq = FreqCompCols[FreqCompCols>0]
 
 # Defining the directional filter
 #Filter parameters
-r0 = 150
+r0 = 100
 sigma = 5.0
-cap = 2.0
+cap = 2.3
 N = 4
 filtSize = imgNoise1.shape[0]
 print("filtSize", filtSize)

@@ -13,6 +13,7 @@ import scipy as sp
 from scipy import linalg, interpolate, misc
 import skimage as sk
 from skimage.transform import rotate
+import util.polynomial3d as poly3
 
 
 def directionalFilter2D(N, cap, r0, sigma, direction, filtSize):
@@ -26,7 +27,7 @@ def directionalFilter2D(N, cap, r0, sigma, direction, filtSize):
     Theta = np.pi / cap
 
     f, u, bCos, theta = steer2dGeneral(Theta, N)
-
+    
     normVals = computeNormalizationConstant2D(N)
 
     u = np.true_divide(u, normVals)
@@ -38,6 +39,7 @@ def directionalFilter2D(N, cap, r0, sigma, direction, filtSize):
     filtSize = int(filtSize)/2 # in pixels
 
     filt = makeSteerFilt(filtSize, f, theta, r0, sigma)
+    filt, filt_odd = makeFiltPair(N, filtSize, r0, sigma)
 
     nonzeroCoefficients = np.arange(-N, N + 1, 2)
     nonzeroCoeffBool = index2boolean(nonzeroCoefficients, N)
@@ -58,8 +60,8 @@ def directionalFilter2D(N, cap, r0, sigma, direction, filtSize):
     steeredFilt = np.abs(np.sum((np.multiply(steerFiltVol, steerCoeff)), axis=2))
     steeredFilt = steeredFilt/np.max(steeredFilt)
 
-    angleCritic, fillingValue = estimateFilterWidth2D(steeredFilt, direction)
-    steeredFilt = maskrippling2D(steeredFilt, direction, filtSize, angleCritic, fillingValue)
+   # angleCritic, fillingValue = estimateFilterWidth2D(steeredFilt, direction)
+   # steeredFilt = maskrippling2D(steeredFilt, direction, filtSize, angleCritic, fillingValue)
     mask = uf.create_circular_mask(steeredFilt.shape[0], steeredFilt.shape[0])
 
     steeredFilt = np.multiply(steeredFilt, mask)
@@ -282,7 +284,7 @@ def makeSteerFilt(filtSize, f, theta, r0, sigmaDenom):
     r = np.sqrt(x**2 + y**2)
     sigma = filtSize/sigmaDenom
     g = np.ones(x.shape)
-    # g = np.exp(-((r-r0)**2) / (2*sigma**2))
+    g = np.exp(-((r-r0)**2) / (2*sigma**2))
     angle = np.arctan2(x, y)
     angle = np.multiply(angle, (angle >= 0)) - np.multiply(angle, (angle < 0))
     angleSize = angle.size
@@ -293,6 +295,13 @@ def makeSteerFilt(filtSize, f, theta, r0, sigmaDenom):
     filt = np.multiply(g, np.reshape(values, g.shape))
 
     return filt
+
+def makeFiltPair(N, filtSize, r0, sigmaDenom):
+    f1,f2, u1, u2, phi, alpha = poly3.make_antisymmetric_poly(N)
+    filt1 = makeSteerFilt(filtSize, f1, phi, r0, sigmaDenom)
+    filt2 = makeSteerFilt(filtSize, f2, phi, r0, sigmaDenom)
+    
+    return filt1, filt2
 
 
 def index2boolean(indexArray, N):
