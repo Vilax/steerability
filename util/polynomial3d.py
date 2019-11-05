@@ -3,6 +3,9 @@ import math
 import scipy.linalg as la
 import matplotlib.pyplot as plt
 from numpy import linalg as npla
+import cvxopt
+from cvxopt import matrix as mat 
+from cvxopt import solvers
 #import scipy.sparse.linalg as sla
 
 def steerable_polynomial3d(poleCap, N, nonzeroBool=None):
@@ -97,4 +100,72 @@ def make_gram_matrix(bCos, sqrtSin, phi, dphi, phiEnd = math.pi/2):
     bCos = np.multiply(bCos, sinMat)
     G = bCos.transpose() * bCos * dphi
     return G
+
+def make_antisymmetric_poly(N, num_samples=400):
+    
+    H, f, A, b, Aeq, beq = get_quadratic_program_params(N)
+    
+    alpha = get_optimal_coefficients(H, f, A, b, Aeq, beq)
+    
+    u1, u2 = separate_odd_even_poly(alpha)
+    
+    dphi = math.pi/(num_samples-1)
+    phi = np.arange(0,math.pi+dphi, dphi)
+    cosPhi = np.cos(phi)
+    
+    f1 = np.polyval(u1, cosPhi)
+    f2 = np.polyval(u2, cosPhi)
+    
+    return f1, f2, u1, u2, phi, alpha
+
+def separate_odd_even_poly(alpha):
+    u1 = np.zeros(alpha.shape)
+    u2 = np.zeros(alpha.shape)
+    
+    N = alpha.shape[0]
+    
+    u1[0:N:2] = alpha[0:N:2]
+    u2[1:N:2] = alpha[1:N:2]
+    u2 = u2[1:]
+    u1 = np.insert(u1, N, 0, axis = 0)
+    u2 = np.insert(u2, N-1, 0, axis = 0)
+    
+    if np.sum(u1) < 0:
+        u1 = -1 * u1
+    if np.sum(u2) < 0:
+        u2 = -1 * u2
+        
+    return u1, u2        
+
+def get_optimal_coefficients(H, f, A, b, Aeq, beq):
+    
+    sol = solvers.qp(H, f, A, b, Aeq, beq)
+    alpha = np.array(sol['x'])
+    
+    return alpha
+
+def get_quadratic_program_params(N):
+    H = mat(compute_quadratic_program_matrix(N), (N,N), 'd')
+    f = mat(np.zeros((N,1)), (N,1), 'd')
+    A = mat([], (0,4), 'd')
+    b = mat([], (0,1), 'd')
+    
+    Aeq = np.zeros((2, N))
+    Aeq[0, 0:N:2] = 1
+    Aeq[1, 1:N:2] = 1
+    Aeq = mat(Aeq, (2, N), 'd')
+    
+    if N % 2 == 0:
+        beq = np.array([[1], [-1]])
+    else:
+        beq = np.array([[-1] ,[1]])
+    beq = mat(beq, (2 , 1), 'd')        
+    
+    return H, f, A, b, Aeq, beq
+
+def compute_quadratic_program_matrix(N):
+    val_range = np.arange(N,0,-1)
+    x,y = np.meshgrid(val_range, val_range)
+    H = 1 / (x+y+1)
+    return H
 

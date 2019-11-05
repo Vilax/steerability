@@ -92,6 +92,12 @@ for isym = 1:size(symAxes,1)
     
     assert(relativeDiffEven < 0.005)
     assert(relativeDiffOdd < 0.005)
-    
 end
+
+% visualize filter slices
+
+evenSlice = squeeze(filtEven(:,101,:));
+oddSlice = squeeze(filtOdd(:,101,:));
+figure; imagesc(evenSlice)
+figure; imagesc(oddSlice)
     
