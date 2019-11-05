@@ -6,6 +6,7 @@ Created on Thu Sep 26 11:22:57 2019
 # @author: jlvilas
 """
 
+
 class emobject:
 
     def __init__(self, name):
@@ -41,5 +42,5 @@ class emobject:
     def geId(self):
         return self.id
 
-    def setId(self, id):
+    def setId(self, idName):
         self.id = id

@@ -12,33 +12,68 @@ import util.resolution as res
 import scipy as sp
 from scipy import fftpack, interpolate
 import matplotlib.pyplot as plt
-import util.steering2D as ste
+import util.steering2D_old as ste
+
+from skimage import color
+from skimage import io
+import util.fourier as fourier
+import util.resolution as res
+
+# Reading image
+img = color.rgb2gray(io.imread('lena.png'))
+img = uf.paddingImageIfIsOdd(img)
+
+# Image parameters
+sampling = 1
+
+# Fourier transform of the image
+fftImg = np.fft.fft2(img)
+fftImg = np.fft.fftshift(fftImg)
+
+#filtering the original image
+sampling = 1
+Digfreq = 0.1
+filterImg = fourier.lowPassFilter(fftImg, Digfreq, sampling, fourier = True)
+# uf.representImg(filterImg,'filtrada', False)
+
+# Adding noise
+mu, sigma = 0, 0.1
+
+# adding noise to the fringe pattern
+imgNoise1 = TstFun.add_gaussian_noise(filterImg, mu, sigma)
+imgNoise2 = TstFun.add_gaussian_noise(filterImg, mu, sigma)
+
+# uf.representImg(imgNoise1, 'original Image Img1', False)
+# uf.representImg(imgNoise2, 'original Image Img2', False)
+
+# Computing resolution
+# global resolution
+FSC, resolution = res.FRC(imgNoise1, imgNoise2, sampling, fourier = False, threshold = 0.143)
+print(resolution)
+# uf.representCurve(range(0,len(FSC)), FSC, 'FSC', True)
+
+# Local resolution
+FSC, resolution = res.localFRC(imgNoise1, imgNoise2, sampling, fourier = False, threshold = 0.143)
+print(resolution)
 
 
+
+
+# # Fourier transform of the image
+# imgNoise_fft1 = np.fft.fft2(imgNoise1)
+# imgNoise_fft1 = np.fft.fftshift(imgNoise_fft1)
+# imgNoise_fft2 = np.fft.fft2(imgNoise2)
+# imgNoise_fft2 = np.fft.fftshift(imgNoise_fft2)
+
+
+
+"""
 # Defining image parameters
 xdim = 512
 ydim = 513
 wavelength = 5
 angle = 0
-mu, sigma = 0, 0.5
 
-# Reading Image:
-
-# Defining a fringe pattern
-img1 = TstFun.define_sinusoidal_pattern(wavelength, xdim, ydim, 1, 0.0)
-img2 = TstFun.define_sinusoidal_pattern(wavelength, xdim, ydim, 1, 0.0)
-
-# adding noise to the fringe pattern
-imgNoise1 = TstFun.add_gaussian_noise(img1, mu, sigma)
-imgNoise2 = TstFun.add_gaussian_noise(img2, mu, sigma)
-
-# uf.representImg(imgNoise1, 'original Image Img1', False)
-# uf.representImg(imgNoise2, 'original Image Img2', False)
-
-# Ensuring odd dimensions for the fft
-imgNoise1 = uf.paddingImageIfIsOdd(imgNoise1)
-imgNoise2 = uf.paddingImageIfIsOdd(imgNoise2)
-uf.representImg(imgNoise1, 'original Image Img1', True)
 
 
 # Fourier transform of the image
@@ -64,8 +99,9 @@ N = 4
 filtSize = imgNoise1.shape[0]
 print("filtSize", filtSize)
 
-direction = 0.0#np.pi/10
+direction = 0.0 #np.pi/10
 dirFilt = ste.directionalFilter2D(N, cap, r0, sigma, direction, filtSize)
+uf.representImg(dirFilt,'filter', True)
 print(dirFilt.shape)
 print(imgNoise_fft1.shape)
 
@@ -86,23 +122,26 @@ print('Gabor resolution = ', resolution)
 uf.representCurve(freq, FSC, 'FSCGabor', True)
 
 
-# count = 0
-# for direc in np.arange(0,np.pi/2, np.pi/18.0):
-#     count = count + 1
-#     print('direction = ',  direc*180/np.pi, 'number = ', count)
-#     dirFilt = ste.directionalFilter2D(N, cap, r0, sigma, direc, filtSize)
-#     uf.representImg(dirFilt, "filter"+str(count), False)
-#
-#     # # Aplying a filter to the image
-#     fft_filt1 = np.multiply(dirFilt, imgNoise_fft1)
-#     fft_filt2 = np.multiply(dirFilt, imgNoise_fft2)
-#
-#     # imReal = np.real(np.fft.ifft2(np.fft.ifftshift(fft_filt1)))
-#     # uf.representImg(imReal, 'Img Real', False)
-#
-#     FSC, resolution = res.estimateFSC(fft_filt1, fft_filt2, freq, 0.143, HPF = True)
-#     # plt.figure()
-#     # plt.plot(freq, FSC)
-#     # plt.title("FSC dir"+str(count))
-#
-# plt.show()
+count = 0
+for direc in np.arange(0,np.pi/2, np.pi/18.0):
+    count = count + 1
+    print('direction = ',  direc*180/np.pi, 'number = ', count)
+    dirFilt = ste.directionalFilter2D(N, cap, r0, sigma, direc, filtSize)
+    uf.representImg(dirFilt, "filter"+str(count), False)
+
+    # # Aplying a filter to the image
+    fft_filt1 = np.multiply(dirFilt, imgNoise_fft1)
+    fft_filt2 = np.multiply(dirFilt, imgNoise_fft2)
+
+    # imReal = np.real(np.fft.ifft2(np.fft.ifftshift(fft_filt1)))
+    # uf.representImg(imReal, 'Img Real', False)
+
+    FSC, resolution = res.estimateGaborFRC(imgNoise_fft1, imgNoise_fft2, 2, freq, 0.143, True)
+    plt.figure()
+    plt.plot(freq, FSC)
+    plt.title("FSC dir"+str(count))
+    print('resolution = ', resolution)
+
+plt.show()
+"""
+
