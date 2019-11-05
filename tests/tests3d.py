@@ -87,7 +87,8 @@ class TestMakeFilterMethods(unittest.TestCase):
         mat = spio.loadmat('orig_filt_N4.mat')
         filt_matlab = mat['filt']
         expected = np.array(filt_matlab)
-        filt_testing = filt.make_filter(n,r0,sigma_denom, self.f_matlab, phi)
+        filt_testing = filt.make_filter(self.n,self.r0,self.sigma_denom,\
+                                        self.f_matlab, self.phi)
         results = filt_testing
         np.testing.assert_allclose(expected, results, rtol = 0.05)
     

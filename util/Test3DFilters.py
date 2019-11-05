@@ -26,7 +26,9 @@ sys.path.insert(0, '../util')
 # polynomial
 
 N = 4
+
 cap_size = math.pi / 3.5
+
 
 f, v, bCos, phi = poly3d.steerable_polynomial3d(cap_size, N)
 

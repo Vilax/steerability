@@ -14,7 +14,7 @@ function filt = makeSteerFilt3D(n, r0, sigmaDenom, constructMethod, varargin)
     g = exp(-(r-r0).^2/(2*sigma^2));
     
     [u, v, w] = project2Sphere(x,y,z);
-    
+
     if isequal(constructMethod, 'poly')
         assert(numel(varargin) == 1);
         p = varargin{1};
