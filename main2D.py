@@ -14,7 +14,55 @@ from scipy import fftpack, interpolate
 import matplotlib.pyplot as plt
 import util.steering2D as ste
 import util.polynomial3d as poly3
+import util.emobject as em
+import skimage as sk
+import util.fourier as fourier
 
+# Image parameters
+sampling = 1
+mu, sigma = 0, 0.1
+FilteringResolution = 10
+N = 5
+r0 = 200
+sigma = 36
+direction = np.pi/2
+filtSize = 513
+
+filter_ = ste.directionalFilter2DQuad(N, r0, sigma, direction, filtSize, nonzeroCoeff = None)
+
+uf.representImg(np.abs(filter_), 'Filter', False)
+uf.representImg(np.imag(filter_), 'Filter', True)
+#
+# # Reading image
+# img = sk.io.imread("lena.png", as_gray=True)
+#
+# # Ensuring odd dimensions for the fft
+# img = uf.paddingImageIfIsOdd(img)
+#
+# #Filtering at "FilteringResolution" to detect the resolution
+# DigFreq = sampling/FilteringResolution
+# imgFiltered = fourier.lowPassFilter(img, DigFreq, sampling, fourier = False)
+#
+# uf.representImg(imgFiltered,'Filtered Image', True)
+#
+# # adding noise to the fringe pattern
+# imgNoise1 = TstFun.add_gaussian_noise(imgFiltered, mu, sigma)
+# imgNoise2 = TstFun.add_gaussian_noise(imgFiltered, mu, sigma)
+#
+# #Computing the global resolution
+# FSC, resolution = res.FRC(imgNoise1, imgNoise2, sampling, fourier = False, threshold = 0.143)
+# freq = np.fft.fftfreq(imgNoise1.shape[1], d=sampling)
+# freq = freq[freq > 0]
+# uf.representCurve(freq, FSC,'FSC', True)
+# print(resolution)
+
+# Computing a directional filter
+
+
+
+
+
+"""
 
 # Defining image parameters
 xdim = 512
@@ -24,6 +72,9 @@ angle = 0
 mu, sigma = 0, 0.5
 
 # Reading Image:
+
+
+
 
 # Defining a fringe pattern
 img1 = TstFun.define_sinusoidal_pattern(wavelength, xdim, ydim, 1, 0.0)
@@ -85,25 +136,5 @@ uf.representCurve(freq, FSC, 'FSCnormal', False)
 FSC, resolution = res.estimateGaborFRC(imgNoise_fft1, imgNoise_fft2, 2, freq, 0.143, False)
 print('Gabor resolution = ', resolution)
 uf.representCurve(freq, FSC, 'FSCGabor', True)
+"""
 
-
-# count = 0
-# for direc in np.arange(0,np.pi/2, np.pi/18.0):
-#     count = count + 1
-#     print('direction = ',  direc*180/np.pi, 'number = ', count)
-#     dirFilt = ste.directionalFilter2D(N, cap, r0, sigma, direc, filtSize)
-#     uf.representImg(dirFilt, "filter"+str(count), False)
-#
-#     # # Aplying a filter to the image
-#     fft_filt1 = np.multiply(dirFilt, imgNoise_fft1)
-#     fft_filt2 = np.multiply(dirFilt, imgNoise_fft2)
-#
-#     # imReal = np.real(np.fft.ifft2(np.fft.ifftshift(fft_filt1)))
-#     # uf.representImg(imReal, 'Img Real', False)
-#
-#     FSC, resolution = res.estimateFSC(fft_filt1, fft_filt2, freq, 0.143, HPF = True)
-#     # plt.figure()
-#     # plt.plot(freq, FSC)
-#     # plt.title("FSC dir"+str(count))
-#
-# plt.show()

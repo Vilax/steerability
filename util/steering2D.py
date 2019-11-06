@@ -16,6 +16,48 @@ from skimage.transform import rotate
 import util.polynomial3d as poly3
 
 
+def directionalFilter2DQuad(N, r0, sigma, direction, filtSize, nonzeroCoeff = None):
+    # This function gives and image with the directional filter
+    # N represent the order of the polynomial of the filter
+    # The angle of the filter is defined as pi/cap
+    # sigma, si the standard deviation of the gaussian which defines the
+    # direction in radians
+
+    steerFiltVol = defineSteerableBasis(N, r0, sigma, filtSize, nonzeroCoeff)
+    steerBasisMat = computeSteerBasis2D(N, nonzeroCoeff)
+    Phi = np.linalg.inv(steerBasisMat)
+
+    # compute e ^ itheta powers
+    dirVals = computeSteerDirection2D(N, direction, nonzeroCoeff)
+
+    k = np.real(np.dot(Phi, dirVals))
+
+    # # compute steered filter
+    steerCoeff = np.reshape(k, [1, 1, len(k)])
+    steeredFilt = np.sum((np.multiply(steerFiltVol, steerCoeff)), axis=2)
+    # steeredFilt = steeredFilt / np.max(steeredFilt)
+
+    # mask = uf.create_circular_mask(steeredFilt.shape[0], steeredFilt.shape[0])
+    #
+    # steeredFilt = np.multiply(steeredFilt, mask)
+
+    return steeredFilt
+
+
+def defineSteerableBasis(N, r0, sigma, filtSize, nonzeroCoeffBool = None):
+    # This function creates the steerable basis filters
+    if nonzeroCoeffBool is None:
+        nonzeroCoeffBool = np.ones((2 * N + 1, 1))
+
+    filt1, filt2 = makeFiltPair(N, filtSize, r0, sigma)
+
+    filt = filt1 + 1j*filt2
+    M = np.sum(nonzeroCoeffBool)
+    steerFiltBasis = makeSteerBasis(filt, M)
+
+    return steerFiltBasis
+
+
 def directionalFilter2D(N, cap, r0, sigma, direction, filtSize):
     # This function gives and image with the directional filter
     # N represent the order of the polynomial of the filter
@@ -276,11 +318,9 @@ def validateBandwidth(L):
 
 
 def makeSteerFilt(filtSize, f, theta, r0, sigmaDenom):
-    print(filtSize)
     nn = np.arange(-filtSize, filtSize, 1)
     # nn = np.arange(-filtSize, filtSize+1, 1) #previously
     x, y = np.meshgrid(nn, nn)
-    print(x.shape)
     r = np.sqrt(x**2 + y**2)
     sigma = filtSize/sigmaDenom
     g = np.ones(x.shape)
@@ -298,8 +338,10 @@ def makeSteerFilt(filtSize, f, theta, r0, sigmaDenom):
 
 def makeFiltPair(N, filtSize, r0, sigmaDenom):
     f1,f2, u1, u2, phi, alpha = poly3.make_antisymmetric_poly(N)
-    filt1 = makeSteerFilt(filtSize, f1, phi, r0, sigmaDenom)
-    filt2 = makeSteerFilt(filtSize, f2, phi, r0, sigmaDenom)
+    print("filtSize", filtSize)
+    filt1, filt2, r = getOddEvenFilters(filtSize, alpha, r0)
+    # filt1 = makeSteerFilt(filtSize, f1, phi, r0, sigmaDenom)
+    # filt2 = makeSteerFilt(filtSize, f2, phi, r0, sigmaDenom)
     
     return filt1, filt2
 
@@ -331,10 +373,15 @@ def validateNonzeroCoefficients(nonzeroCoefficients, N):
     return numNonzero
 
 
-def computeSteerBasis2D(N, nonzeroCoeff):
+def computeSteerBasis2D(N, nonzeroCoeff = None):
     # % assumes nonzeroCoeff is a vector of bools
+    if nonzeroCoeff is None:
+        nonzeroCoeff = np.ones((2 * N + 1))
+
     numNonzero = validateNonzeroCoefficients(nonzeroCoeff, N)
     powersBase = np.transpose(np.arange(-N,N+1,1))
+    print("powersBase", powersBase, "  ", powersBase.shape )
+    print("nonzeroCoeff", nonzeroCoeff, "  ", nonzeroCoeff.shape)
     powerSpec = powersBase[nonzeroCoeff == 1]
     steerThetaBase = getSteerAngles2D(numNonzero) #np.matlib.repmat(steerTheta, numNonzero, 1)
     steerThetaBase = np.matlib.repmat(steerThetaBase, int(numNonzero), 1)
@@ -359,22 +406,20 @@ def makeSteerBasis(filt, M):
     nrows = dims[0]
     ncols = dims[1]
     nfilts = int(M)
-    steerFiltVol = np.zeros((nrows, ncols, nfilts), dtype=float)
+    steerFiltVol = np.zeros((nrows, ncols, nfilts), dtype="complex128")
     for id in range(0, nfilts):
         angleRotate = anglesDeg[id]
-        thisFilt = rotate(filt, -angleRotate)
+        thisFilt = rotate(np.real(filt), -angleRotate)
+        thisFilt = thisFilt + 1j*rotate(np.imag(filt), -angleRotate)
         steerFiltVol[:,:, id] = np.transpose(thisFilt)
 
     return steerFiltVol
 
 
-def computeSteerDirection2D(N, Theta, *args):
-    varargin = args
-    nargin = 2 + len(varargin)
-    if nargin < 3:
-        nonzeroCoeff = np.ones((2 * N + 1, 1))
-    else:
-        nonzeroCoeff = args[0]
+def computeSteerDirection2D(N, Theta, nonzeroCoeff = None):
+    if nonzeroCoeff is None:
+        nonzeroCoeff = np.ones((2 * N + 1))
+
     # numNonzero = validateNonzeroCoefficients(nonzeroCoeff, N)
     powersBase = np.arange(-N, N+1, 1)
     aux = nonzeroCoeff.astype(int) == 1
@@ -382,4 +427,55 @@ def computeSteerDirection2D(N, Theta, *args):
     dirVals = np.exp(1j * (np.multiply(Theta, powerSpec) ) )
 
     return dirVals
+
+def getOddEvenFilters(n, alpha, c):
+    # alpha = np.array([-0.3001, 0.7612, -0.6723, 0.2388, -0.0275])
+    k = len(alpha)
+    alpha_odd = -alpha[::2]
+    alpha_even = alpha[1::2]
+
+    mid = n / 2 + 1
+    aux = np.arange(1,n+1)
+    x, y = np.meshgrid(aux, aux)
+    x = x - mid
+    y = y - mid
+    theta = np.arctan2(x,y)
+    r = np.sqrt(x**2 + y**2)
+    r_n = 1.5 * r / c
+    r_n = (r_n - 1.5) + 1.5
+    fr = b_spline(r_n)
+    ftheta_even = np.zeros((len(theta), 1))
+    print(len(alpha_even))
+    for i in range(0, len(alpha_even)):
+        exponent = k + 1 - 2 * (i+1)
+        ftheta_even = ftheta_even + alpha_even[i]* np.power(np.cos(theta), exponent)
+
+    f_even = np.multiply(ftheta_even, fr)
+
+    ftheta_odd = np.zeros((len(theta), 1))
+
+    for i in range(0, len(alpha_odd)):
+        exponent = k + 2 - 2 * (i+1)
+
+        ftheta_odd = ftheta_odd + alpha_odd[i] * np.power(np.cos(theta), exponent)
+
+    f_odd = np.multiply(ftheta_odd, fr)
+
+    return f_even, f_odd, r
+
+
+def b_spline(u):
+
+    u = np.minimum(np.maximum(0, u), 3)
+    aux = np.ones(u.shape)
+    u1 = np.multiply(aux, u < 1)
+    u2 = np.multiply(aux, (u >= 1) & (u < 2))
+    u3 = np.multiply(aux, (u >= 2))
+
+    f = 0.5 * np.multiply(u**2, u1)
+    f = f + 0.5 * np.multiply(-3 + 6 * u - 2 * u**2, u2)
+    f = f + 0.5 * np.multiply((3 - u)**2, u3)
+
+    return f
+
 

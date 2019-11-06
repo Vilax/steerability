@@ -147,7 +147,7 @@ def get_optimal_coefficients(H, f, A, b, Aeq, beq):
 def get_quadratic_program_params(N):
     H = mat(compute_quadratic_program_matrix(N), (N,N), 'd')
     f = mat(np.zeros((N,1)), (N,1), 'd')
-    A = mat([], (0,4), 'd')
+    A = mat([], (0,N), 'd')
     b = mat([], (0,1), 'd')
     
     Aeq = np.zeros((2, N))
