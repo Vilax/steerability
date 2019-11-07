@@ -30,10 +30,10 @@ function [f,u,bCos,phi]=  steer3dGeneral(Theta, N, nonzeroBool)
    obj=(u'*G1*u)/(u'*G2*u)
     %Make the steerable function and plot it
     f=makeSteerableFunction(v(:,1),bCos);
-    fmin=min(f/f(1))
-    figure(1);
-    hold on;
-    plot(phi,f/f(1));
+%     fmin=min(f/f(1))
+%     figure;
+%     hold on;
+%     plot(phi,f/f(1));
     f = f/f(1);
 end
 

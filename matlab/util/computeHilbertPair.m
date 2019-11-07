@@ -7,6 +7,8 @@ function v = computeHilbertPair(N, Theta)
     
     u = u/sum(u);
     u = flipud(u);
+    u = zeros(size(u));
+    u(1) = 1;
     m = numel(u);
      % for visualizing
     pad = zeros([m,1]);
@@ -47,8 +49,13 @@ function v = computeHilbertPair(N, Theta)
 %     b = zeros([1,N]);
     A= []; b= [];
     
-    ub  = [];
-    lb = zeros([N,1]);
+    ub  = []; lb = [];
+    small_constant = 1e-6;
+    SMALL_CONSTANT = 1e-6;
+    ub = ones([N,1]) * SMALL_CONSTANT;
+    for id=[1:2:N];
+        ub(id) = Inf;
+    end
     v = quadprog(H,f,A,b,Aeq,beq,lb,ub)
 end
 
