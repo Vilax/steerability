@@ -1,5 +1,5 @@
 
-for k = 1:1000
+for k = 1:10
 N = 5;
 [H, f, A, b, Aeq, beq] = getQuadProgParams(N);
 range1 = generateRandIncrSeq(N, 'ascend');
@@ -8,8 +8,9 @@ range1 = randn([1,N]);
 range2 = randn([1,N]);
 [x,y] = meshgrid(range1, range2);
 
-
-H = x+y;
+x
+y
+H = x+y
 % H = randn(N);
 alpha = quadprog(H,f,A,b,Aeq,beq)
 end

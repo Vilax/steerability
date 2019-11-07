@@ -2,19 +2,25 @@ close all; clear all;
 
 % with this script we form special polynomials to steer with, optimizing
 % for closeness to quadrature
-
+capSize = pi/6;
 N_even = 4;
 N_odd = 3;
 maxDeg = 4; 
 numSamples = 400;
-[f_even, f_odd, u_even, u_odd, phi,~] = makeQuadPoly(maxDeg, numSamples);
-
+[f_even, f_odd, u_even, u_odd, phi,alpha]=makeQuadPoly(maxDeg, numSamples);
+alpha = computeHilbertPair(N, capSize);
+[f_even, f_odd, u_even, u_odd, phi] = makeFunctionPair(alpha, numSamples);
 f0 = 10;
 r0 = 30;
 n = 100;
 sigmaDenom = n / (0.368*r0);
 filtEven = makeSteerFilt3D(n, r0, sigmaDenom, 'interpolation', f_even,phi);
 filtOdd = makeSteerFilt3D(n, r0, sigmaDenom, 'interpolation', f_odd,phi);
+
+diff = abs(filtEven) - abs(filtOdd);
+quadError = norm(diff(:),2) / norm(filtEven(:),2)
+quadError = norm(diff(:),2) / norm(filtOdd(:),2)
+
 WriteMRC(filtEven, 1, 'filtQuadEven.mrc')
 WriteMRC(filtOdd, 1, 'filtQuadOdd.mrc')
 
@@ -76,10 +82,23 @@ for isym = 1:size(symAxes,1)
     diffEven = steeredFiltEven - bruteForceFilterEven;
     relativeDiffEven = norm(diffEven(:),2) / norm(bruteForceFilterEven(:),2)
     
-    steeredFiltOdd = sum( k_even .* steerFiltHyperVolumeOdd, 4);
+    steeredFiltOdd = sum( k_odd .* steerFiltHyperVolumeOdd, 4);
     bruteForceFilterOdd = rotateFilt3D(filtOdd, axis);    
-    diffEven = steeredFiltOdd - bruteForceFilterOdd;
-    relativeDiffEven = norm(diffEven(:),2) / norm(bruteForceFilterEven(:),2)
+    diffOdd = steeredFiltOdd - bruteForceFilterOdd;
+    relativeDiffOdd = norm(diffOdd(:),2) / norm(bruteForceFilterOdd(:),2)
     
+    diff = abs(steeredFiltEven) - abs(steeredFiltOdd);
+    quadError = norm(diff(:),2) / norm(steeredFiltEven(:),2)
+    quadError = norm(diff(:),2) / norm(steeredFiltOdd(:),2)
+    
+    assert(relativeDiffEven < 0.005)
+    assert(relativeDiffOdd < 0.005)
 end
+
+% visualize filter slices
+
+evenSlice = squeeze(filtEven(:,101,:));
+oddSlice = squeeze(filtOdd(:,101,:));
+figure; imagesc(evenSlice)
+figure; imagesc(oddSlice)
     

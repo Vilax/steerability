@@ -2,13 +2,14 @@ close all; clear all;
 
 % with this script we form special polynomials to steer with, optimizing
 % for closeness to quadrature
-
+capSize = pi/6;
 N_even = 4;
 N_odd = 3;
 maxDeg = 4; 
 numSamples = 400;
 [f_even, f_odd, u_even, u_odd, phi,alpha]=makeQuadPoly(maxDeg, numSamples);
-
+alpha = computeHilbertPair(N_even, capSize);
+[f_even, f_odd, u_even, u_odd, phi] = makeFunctionPair(alpha, numSamples);
 f0 = 10;
 r0 = 30;
 n = 100;
