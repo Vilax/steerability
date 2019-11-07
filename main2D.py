@@ -12,7 +12,7 @@ import util.resolution as res
 import scipy as sp
 from scipy import fftpack, interpolate
 import matplotlib.pyplot as plt
-import util.steering2D as ste
+import util.steering2D_class as ste
 import util.polynomial3d as poly3
 import util.emobject as em
 import skimage as sk
@@ -22,41 +22,59 @@ import util.fourier as fourier
 sampling = 1
 mu, sigma = 0, 0.1
 FilteringResolution = 10
+
+# Reading image
+img = sk.io.imread("lena.png", as_gray=True)
+
+# Ensuring odd dimensions for the fft
+img = uf.paddingImageIfIsOdd(img)
+
+#Filtering at "FilteringResolution" to detect the resolution
+DigFreq = sampling/FilteringResolution
+imgFiltered = fourier.lowPassFilter(img, DigFreq, sampling, fourier = False)
+
+uf.representImg(imgFiltered,'Filtered Image', False)
+
+# adding noise to the fringe pattern
+imgNoise1 = TstFun.add_gaussian_noise(imgFiltered, mu, sigma)
+imgNoise2 = TstFun.add_gaussian_noise(imgFiltered, mu, sigma)
+
+#Computing the global resolution
+FSC, resolution = res.FRC(imgNoise1, imgNoise2, sampling, fourier = False, threshold = 0.143)
+freq = np.fft.fftfreq(imgNoise1.shape[1], d=sampling)
+freq = freq[freq > 0]
+uf.representCurve(freq, FSC,'FSC', False)
+print(resolution)
+
+# Computing a directional filter
 N = 5
 r0 = 200
 sigma = 36
-direction = np.pi/2
-filtSize = 513
+direction = 0.0# np.pi/2
+filtSize = imgNoise1.shape[0]
 
-filter_ = ste.directionalFilter2DQuad(N, r0, sigma, direction, filtSize, nonzeroCoeff = None)
+Steer2DFitlers = ste.steering2D(N, r0, sigma, filtSize, nonzeroCoeff = None)
+
+filter_ = Steer2DFitlers.directionalFilter2DQuad(direction)
 
 uf.representImg(np.abs(filter_), 'Filter', False)
-uf.representImg(np.imag(filter_), 'Filter', True)
-#
-# # Reading image
-# img = sk.io.imread("lena.png", as_gray=True)
-#
-# # Ensuring odd dimensions for the fft
-# img = uf.paddingImageIfIsOdd(img)
-#
-# #Filtering at "FilteringResolution" to detect the resolution
-# DigFreq = sampling/FilteringResolution
-# imgFiltered = fourier.lowPassFilter(img, DigFreq, sampling, fourier = False)
-#
-# uf.representImg(imgFiltered,'Filtered Image', True)
-#
-# # adding noise to the fringe pattern
-# imgNoise1 = TstFun.add_gaussian_noise(imgFiltered, mu, sigma)
-# imgNoise2 = TstFun.add_gaussian_noise(imgFiltered, mu, sigma)
-#
-# #Computing the global resolution
-# FSC, resolution = res.FRC(imgNoise1, imgNoise2, sampling, fourier = False, threshold = 0.143)
-# freq = np.fft.fftfreq(imgNoise1.shape[1], d=sampling)
-# freq = freq[freq > 0]
-# uf.representCurve(freq, FSC,'FSC', True)
-# print(resolution)
+uf.representImg(np.imag(filter_), 'Filter', False)
 
-# Computing a directional filter
+imgNoise1_filtered = np.fft.fft2(imgNoise1)
+imgNoise1_filtered = np.fft.fftshift(imgNoise1_filtered)
+
+imgNoise2_filtered = np.fft.fft2(imgNoise2)
+imgNoise2_filtered = np.fft.fftshift(imgNoise2_filtered)
+
+imgNoise1_filtered = np.multiply(imgNoise1_filtered, filter_)
+imgNoise2_filtered = np.multiply(imgNoise2_filtered, filter_)
+
+
+
+# Computing local FRC
+resmap = res.localFRC(imgNoise1_filtered, imgNoise2_filtered, sampling, fourier = True)
+
+
 
 
 

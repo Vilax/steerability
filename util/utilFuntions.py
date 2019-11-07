@@ -19,7 +19,6 @@ def paddingImageIfIsOdd(img):
             imgPadded = img
         if (img.shape[1] % 2) == 0:
             imgPadded = np.pad(imgPadded, ((0, 0), (0, 1)), 'edge')
-    print("img = ", img.shape)
     if dims == 3:
         if (img.shape[0] % 2) == 0:
             imgPadded = np.pad(img, ((0, 1), (0, 0), (0, 0)), 'edge')

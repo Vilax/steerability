@@ -45,7 +45,7 @@ def FRC(half1, half2, sampling, fourier = True, threshold = 0.143):
     return FSCcurve, resolution
 
 
-def localFRC(half1, half2, sampling, fourier = True, threshold = 0.143):
+def localFRC(half1, half2, sampling, fourier = True, threshold = 0.143, direction = None):
 
     assert half1.shape == half2.shape, 'Halves has not the same dimensions'
 
@@ -54,6 +54,9 @@ def localFRC(half1, half2, sampling, fourier = True, threshold = 0.143):
         # half1 = np.fft.fftshift(half1)
         half2 = np.fft.fft2(half2)
         # half2 = np.fft.fftshift(half2)
+
+    if direction is not None:
+        print('caca')
 
     freq = np.fft.fftfreq(half1.shape[1], d=sampling)
     freq = freq[freq > 0]
