@@ -35,7 +35,7 @@ function  [f,u,bCos,theta] = steer2dMonotone(Theta,N, nonzeroBool)
     hold on;
     plot(theta,f);
     
-%     %Save basis and theta
+    %Save basis and theta
 %     nTerms=k;
 %     nPoints=100;
 %     sCoeff=u;
