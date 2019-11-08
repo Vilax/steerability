@@ -6,9 +6,11 @@ Created on Thu Sep 26 11:22:57 2019
 # @author: jlvilas
 """
 
+
 class emobject:
 
-    def __init__(self, name):
+    def __init__(self, data):
+        self.data = data
         self.rows = None
         self.cols = None
         self.elems = None
@@ -41,5 +43,5 @@ class emobject:
     def geId(self):
         return self.id
 
-    def setId(self, id):
+    def setId(self, idName):
         self.id = id

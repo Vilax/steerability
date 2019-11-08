@@ -19,7 +19,6 @@ def paddingImageIfIsOdd(img):
             imgPadded = img
         if (img.shape[1] % 2) == 0:
             imgPadded = np.pad(imgPadded, ((0, 0), (0, 1)), 'edge')
-    print("img = ", img.shape)
     if dims == 3:
         if (img.shape[0] % 2) == 0:
             imgPadded = np.pad(img, ((0, 1), (0, 0), (0, 0)), 'edge')
@@ -84,7 +83,7 @@ def createGaussianHPF(filterSize, sigma, r0):
     nn = np.arange(-filterSize, filterSize, 1)
     x, y = np.meshgrid(nn, nn)
     r = np.sqrt(x ** 2 + y ** 2)
-
+    sigma = 0.368*r0
     gaussianImg = np.exp(-((r-r0)**2) / (2*sigma**2))
     gaussianImg[r>r0] = 1.0
     # representImg(gaussianImg, 'gauss', True)
@@ -102,20 +101,19 @@ def createGaussian(filterSize, sigma, r0):
     return gaussianImg
 
 
-def create_spherical_mask(xdim, ydim, zdim, center=None, radius=None):
+def create_spherical_mask(xdim, ydim, center=None, radius=None):
 
     if center is None: # use the middle of the image
-        center = [int(xdim/2), int(ydim/2), int(zdim/2)]
+        center = [int(xdim/2), int(ydim/2)]#, int(zdim/2)]
     if radius is None: # use the smallest distance between the center and image walls
-        radius = min(center[0], center[1], center[2], xdim-center[0], ydim-center[1], zdim-center[2])
+        radius = min(center[0], center[1], center[2], xdim-center[0], ydim-center[1]) #, zdim-center[2])
     print(center)
-    Z, Y, X = np.ogrid[:xdim, :ydim, :zdim]
-    dist_from_center = np.sqrt((X - center[0])**2 + (Y-center[1])**2 + (Z - center[2])**2 )
+    Y, X = np.ogrid[:xdim, :ydim]#, :zdim]
+    dist_from_center = np.sqrt((X - center[0])**2 + (Y-center[1])**2 )#+)# (Z - center[2])**2 )
 
     mask = dist_from_center <= radius
 
     return mask
-
 
 def createShell(xdim, ydim, zdim, rad):
     mask1 = create_spherical_mask(xdim, ydim, zdim, radius=rad)
@@ -127,7 +125,9 @@ def createShell(xdim, ydim, zdim, rad):
 
 
 def createShellHPF(xdim, ydim, zdim, rad):
+
     dim = min(xdim, ydim, zdim)
+
     mask1 = create_spherical_mask(xdim, ydim, zdim, radius=rad)
     mask2 = create_spherical_mask(xdim, ydim, zdim, radius=dim)
 
