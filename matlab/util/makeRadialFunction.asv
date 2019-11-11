@@ -1,0 +1,17 @@
+function g = makeRadialFunction(type, varargin)
+    if isequal(type, 'gaussian')
+        n = varargin{1};
+        r0 = varargin{2};
+        sigmaDenom = varargin{3};
+        g = makeGaussianRadial(n, r0, sigmaDenom);
+    elseif isequal(type, 'spline')
+        n = varargin{1};
+        u = varargin{2};
+        g = makeSplineRadial(n,u);
+    end
+end
+
+function makeGaussianRadial(n,r0,sigmaDenom);
+    [x,y] = meshgrid(-n:n, -n:n);
+    
+

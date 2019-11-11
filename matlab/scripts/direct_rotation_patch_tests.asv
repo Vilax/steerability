@@ -1,0 +1,29 @@
+% this script runs tests of new rotation tests.
+close all; clear all;
+N = 5;
+Theta = pi/3;
+M = 6;
+[f,u,bCos,theta]=steer2dNorm(Theta,M);
+
+% retrieve polynomial values and basis and eigenvector (for normalized
+% basis)
+nonzeroCoefficients = [-N:2:N];
+nonzeroCoeffBool = index2boolean(nonzeroCoefficients, N);
+M = validateNonzeroCoefficients(nonzeroCoeffBool, N);
+
+nonzeroCoeff = [0,1,0,1,0,1];
+[f,u, bCos, theta] =   steer2dGeneral(Theta,N,nonzeroCoeff);
+r0 = 50;
+sigmaDenom = 5;
+filt = makeSteerFilt(100, f, theta, r0, sigmaDenom);
+
+% workflow: test on one or two select angles (old vs new); then test
+% overall makesteerbasis function. 
+
+testAngleArr = [12:
+testFilt = imrotate(filt, testAngle, 'bilinear', 'crop');
+filtRotated = makeRotatedFilt(100, f, theta, r0, sigmaDenom, testAngle);
+
+figure; imagesc(testFilt);
+figure; imagesc(filtRotated);
+
