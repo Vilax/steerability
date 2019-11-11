@@ -22,15 +22,15 @@ function [f1, f2, u1, u2, phi, alpha] = makeQuadPoly(N, numSamples)
     
     f1 = polyval(u1, cosPhi);
     f2 = polyval(u2, cosPhi);
-    
-    figure; plot(cosPhi, f1);
-    hold on; plot(cosPhi,f2);
+    %     figure; plot(cosPhi, f1);
+%     hold on; plot(cosPhi,f2);
+
     
     x = [0:1/(numSamples-1):1]';
     g1 = polyval(u1, x);
     g2 = polyval(u2, x);
-    figure; plot(x, f1); hold on;
-    plot(x, f2);
+%     figure; plot(x, f1); hold on;
+%     plot(x, f2);
 end
 
 function [H, f, A, b, Aeq, beq] = getQuadProgParams(N)
