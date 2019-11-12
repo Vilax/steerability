@@ -39,7 +39,7 @@ steerAngles = computeSteerBasisAngles3D(N, DirCos);
 [Q,R] = qr(steerAngles);
 Phi = inv(steerAngles);
 
-steerFiltHyperVolume = makeSteerBasis3D(filt, DirCos);
+steerFiltHyperVolume = makeSteerBasis3D(f,phi,DirCos,'gaussian',n,r0,sigmaDenom);
 nfilt = size(steerFiltHyperVolume, 4);
 
 symAxes =[[1, 2,3];

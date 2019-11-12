@@ -1,0 +1,18 @@
+function g = getRadialFunction3d(type, varargin)
+    if isequal(type, 'gaussian')
+        n = varargin{1};
+        r0 = varargin{2};
+        sigmaDenom = varargin{3};
+        g = makeGaussianRadial3d(n,r0,sigmaDenom);
+    elseif isequal(type, 'spline')
+        g = ones([n,n,n]);
+    end
+        
+end
+
+function g = makeGaussianRadial3d(n,r0,sigmaDenom)
+    [x,y,z] = meshgrid(-n:n,-n:n, -n:n);
+    r = sqrt(x.^2 + y.^2 + z.^2);
+    sigma = n/sigmaDenom;
+    g = exp(-(r-r0).^2/(2*sigma^2));
+end
