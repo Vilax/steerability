@@ -16,3 +16,7 @@ for N =4:10
     plot(x, vals);
     legend;
 end
+
+% test result that Mx1 = Mx2
+
+N = 6;
