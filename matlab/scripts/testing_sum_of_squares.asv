@@ -1,0 +1,2 @@
+% Finds even polynomials to minimize int_0^1 (1-x^2)(p1(x)^2+p2(x)) dx
+% where p1 and p2 are both even polynomials

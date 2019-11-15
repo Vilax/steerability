@@ -24,7 +24,6 @@ function D = computeNormalizedDMatrixPoleCap(Theta,L)
 
     % compute size of matrix 
     N = L/2+1;
-    
     incr = [1:N]';
     incrRowMat = repmat(incr, [1, N]);
     incrColMat = incrRowMat';
