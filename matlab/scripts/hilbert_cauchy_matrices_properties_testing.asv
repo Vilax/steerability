@@ -1,0 +1,12 @@
+% empirically testing facts about hilbert matrices
+
+for k=2:12 
+    N = 28k
+    a = invhilb(k);
+    [he, ho, heo] = separateMatrixParity(a);
+    she=sum(he(:))
+    sho=sum(ho(:))
+    sheo=sum(heo(:))
+    assert(she > abs(sheo));
+    assert(abs(sheo) > sho);
+end
