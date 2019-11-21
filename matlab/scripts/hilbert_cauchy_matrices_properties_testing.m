@@ -27,3 +27,11 @@ for k=2:10
 
     end
 end
+
+% tests formula for a^ against computed values of optimal alpha
+
+k = 3;
+N = 2*k;
+[H, f, A, b, Aeq, beq] = getQuadProgParams(N);
+alpha = quadprog(H, f, A, b, Aeq, beq) 
+lambda = computeLagrangeCoefficients(H);
