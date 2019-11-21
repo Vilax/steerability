@@ -141,7 +141,13 @@ class steering2D:
             steerFiltVol[:, :, id] = np.transpose(thisFilt)
 
         return steerFiltVol
+    def makeRotatedFilter(self, f, theta, angle):
+        r0 = self.r0
+        sigma = self.sigma
+        n = (filtSize - 1) / 2
 
+        
+        
     def computeSteerDirection2D(self, Theta):
         if self.nonzeroCoeff is None:
             self.nonzeroCoeff = np.ones((2 * self.N + 1))

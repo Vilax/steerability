@@ -5,7 +5,7 @@ from scipy.spatial.transform import Rotation as R
 from numpy import linalg as la
 from scipy import ndimage as ndimg
 import util.polynomial3d as poly3d
-import util.filter3d as filt
+import util.filter3d as filt3d
 import util.utilFuntions as uf
 
 
@@ -18,17 +18,19 @@ def directionalFilter3D(N, cap, r0, sigma, direction, filtSize):
     import time
 
     f, v, bCos, phi = poly3d.steerable_polynomial3d(cap, N)
-    filtSize = int(filtSize) / 2  # in pixels
+    n = int(np.floor(filtSize / 2))  # in pixels
+    print(n)
     start = time.time()
-    orig_filt = filt.make_filter(filtSize, r0, sigma, f, phi)
+    orig_filt = filt3d.make_filter(n, r0, sigma, f, phi)
     end = time.time()
     print('Total Time ', end - start)
-    img = orig_filt[:, 100, :]
+    img = orig_filt[:, n, :]
     uf.representImg(img, 'Filter', True)
 
-    direction_cosines = np.loadtxt('3d_direction_cosines_N4.txt')
+    direction_cosines = np.loadtxt('scripts/3d_direction_cosines_N4.txt')
     start = time.time()
-    steer_basis_hypervol = make_steer_basis3d(orig_filt, direction_cosines)
+    steer_basis_hypervol = make_steer_basis3d(n, f, phi, direction_cosines,\
+                                              'gaussian', r0, sigma)
     end = time.time()
     print('Total Time ', end - start)
     num_basis_filters = steer_basis_hypervol.shape[3]
@@ -208,16 +210,19 @@ def direction_cosine_powers3d(N):
     return powers
 
 
-def make_steer_basis3d(filt, steer_direction_array):
+def make_steer_basis3d(n, f, phi, steer_direction_array, radial_type, *args):
     nfilt = steer_direction_array.shape[0]
-    nrows, ncols, nframes = filt.shape
-
+    nrows = int(2*n+1)
+    ncols = nrows
+    nframes = nrows
     steer_filt_hypervolume = np.zeros((nrows,ncols,nframes,nfilt))
 
     for ifilt in np.arange(nfilt):
         steer_direction = steer_direction_array[ifilt,:]
-        steer_filt = rotate_filter3d(filt, steer_direction)
+        steer_filt = filt3d.makeOrientedFilter3d(n,f,phi, steer_direction, \
+                                          radial_type, args)
         steer_filt_hypervolume[:,:,:,ifilt] = steer_filt
+
         
     return steer_filt_hypervolume
 
