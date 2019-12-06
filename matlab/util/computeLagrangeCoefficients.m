@@ -2,7 +2,7 @@ function lambda = computeLagrangeCoefficients(H, B, c)
     N = size(H,1);
  
     if nargin < 3
-        c = [1; -1];
+        c = [-1; 1];
     end
     if nargin < 2      
         B = zeros(2,N);

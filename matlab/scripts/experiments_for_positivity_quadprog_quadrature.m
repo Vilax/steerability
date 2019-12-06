@@ -11,12 +11,15 @@ for N= 5:7
 % x
 % y
 % H = x+y
-% H = randn(N);
-range1 = [1:N];
-range2 = [2:3:3*N];
-[x,y] = meshgrid(range1, range2)
-H = x+y;
+H = randn(N);
+% range1 = [1:N];
+% range2 = [2:3:3*N];
+% [x,y] = meshgrid(range1, range2)
+% H = x+y;
 H = (H+H')/2
+a = max(H(:));
+x = a + rand(1)*(3*a)
+H = ceil(x) * eye(N) + H;
 alpha = quadprog(H,f,A,b,Aeq,beq)
 end
 %theory: H only needs to be increasing in both row and col
